@@ -51,16 +51,28 @@ public class REcompile {
     public void term(String s)
     {
         factor(s);
+        //if symbol at pointer is am *
+        //get previous index and the next one
+        //forward the pointer by one
         if(s.charAt(globalInt)=='*')
         {
+            
             nextPhrase1 = globalInt - 1;
             nextPhrase2 = globalInt + 1;
             fsm = new state(s.charAt(globalInt), nextPhrase1,nextPhrase2);
             FiniteStateMachine.add(fsm);
             globalInt++;
         }
+        //
         else if(s.charAt(globalInt) == '|')
         {
+            if(s.charAt(globalInt - 2) == '|')
+            {
+                    
+            }
+            nextPhrase1 = globalInt -1;
+            nextPhrase2 = globalInt +1;
+            fsm = new state(s.charAt(globalInt), nextPhrase1,nextPhrase2);
             globalInt++;
             term(s);
         }
@@ -81,10 +93,9 @@ public class REcompile {
             expression(s);
             if(s.charAt(globalInt)==')') 
               globalInt++;
-
               else 
               {
-                  error();
+                error();
               }
             }
         }
