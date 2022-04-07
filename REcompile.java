@@ -5,14 +5,18 @@ import java.util.ArrayList;
 import org.w3c.dom.Node;
 
 public class REcompile {
-    ArrayList<Character> nodeArray;
+    ArrayList<state> FiniteStateMachine;
     String input = "";
     int globalInt = 0;
     ArrayList<Character> nonLiterals = new ArrayList<Character>();
+    state fsm;
+    int nextPhrase1;
+    int nextPhrase2;
     public void main(String[] args)
     {
-    nodeArray = new ArrayList<Character>();
-    String nonLiteralString = ".*+?|()\\[]";
+        
+    FiniteStateMachine = new ArrayList<state>();
+    String nonLiteralString = "?|()\\[]";
     for(int i = 0; i < nonLiteralString.length();i++)
     {
         nonLiterals.add(nonLiteralString.charAt(i));
@@ -29,7 +33,8 @@ public class REcompile {
         {
             input += args[argsIndex];
         }
-    } 
+    }
+        parse(input); 
     } 
     //find an expression
     //output a Term first before expression
@@ -48,18 +53,25 @@ public class REcompile {
         factor(s);
         if(s.charAt(globalInt)=='*')
         {
+            nextPhrase1 = globalInt - 1;
+            nextPhrase2 = globalInt + 1;
+            fsm = new state(s.charAt(globalInt), nextPhrase1,nextPhrase2);
+            FiniteStateMachine.add(fsm);
             globalInt++;
         }
         else if(s.charAt(globalInt) == '|')
         {
             globalInt++;
-            factor(s);
+            term(s);
         }
     }
     public void factor(String s)
     {
         if(isVocab(s.charAt(globalInt)))
         {
+            int nextPhrases =  globalInt+ 1;
+            fsm = new state(s.charAt(globalInt), nextPhrases, nextPhrases);
+            FiniteStateMachine.add(fsm);
             globalInt++;
         }
         else
@@ -69,7 +81,11 @@ public class REcompile {
             expression(s);
             if(s.charAt(globalInt)==')') 
               globalInt++;
-              else error();
+
+              else 
+              {
+                  error();
+              }
             }
         }
     }
@@ -92,6 +108,6 @@ public class REcompile {
     }
     public void error()
     {
-        System.err.print("Wrong compiler");
+        System.err.print("Invalid expression");
     }
 }
