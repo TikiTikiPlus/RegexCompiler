@@ -1,3 +1,5 @@
+package com.company;
+
 public class state {
     private char _symbol;
     private int _nextPhrase1;
