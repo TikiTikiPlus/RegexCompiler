@@ -20,9 +20,19 @@ public class state {
     {
         return this._nextPhrase1;
     }
+    public int nextPhraseIndex(int nextPhrase)
+    {
+        this._nextPhrase1 = nextPhrase;
+        return this._nextPhrase1;
+    }
     public int nextPhrase2Index()
     {
         return this._nextPhrase2;
+    }
+    public int nextPhrase2Index(int nextPhrase2)
+    {
+        this._nextPhrase2 = nextPhrase2;
+        return this.nextPhrase2Index();
     }
     public int stateIndex(){return this._stateIndex;}
 }
