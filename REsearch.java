@@ -13,7 +13,8 @@ public class REsearch {
             File file = new File(args[0]);
             Scanner sc = new Scanner(file);
             while (sc.hasNextLine()) {
-                stringArr.add(sc.nextLine());
+                input = sc.nextLine();
+                stringArr.add(input += "\0");
             }
             sc.close();
         }
@@ -23,7 +24,6 @@ public class REsearch {
         }
 
         fsmStateList.add(new FSMstate('\0', -1, -1));
-
 
         while(input != null) {  // loop that reads the ouput from the compiler and stores it
             try {
@@ -36,9 +36,6 @@ public class REsearch {
             catch(Exception e) {}
         }
 
-        //for(int i = 0; i < fsmStateList.size(); i++) {
-            //fsmStateList.get(i).printState();
-        //}
         for(int i = 0; i < stringArr.size(); i++) {
             if(checkLine(fsmStateList, stringArr.get(i))) System.out.println(stringArr.get(i));
         }
@@ -49,38 +46,37 @@ public class REsearch {
         char[] chArr = s.toCharArray();
         int mark = 0;
         int pointer = 0;
-        //while(mark < chArr.length) {
+        boolean incrementPointer = false;
+        while(mark < chArr.length) {
+            incrementPointer = false;
             try {
                 while(true) {
-                    deque.printStack();
                     int stateNum = deque.popCurr();
                     FSMstate currState = fsmsl.get(stateNum);
-                    
-                    if(currState.getChar() == chArr[mark+pointer] || currState.getChar() == '.') {
+                    if(currState.getChar() == chArr[mark+pointer] || currState.getChar() == '.' || currState.getChar() == '+') {
+                        if(currState.getChar() == chArr[mark+pointer] || currState.getChar() == '.') incrementPointer = true;
                         if(currState.getNext1() == 0 && currState.getNext2() == 0) return true;
-                        pointer++;
                         if(!currState.getVisited()) deque.insertNext(currState.getNext1());
                         if(!currState.isNextDupe() && !currState.getVisited()) deque.insertNext(currState.getNext2());
                     }
-                    else if (currState.getChar() == '+') {
-                        if(currState.getNext1() == 0 && currState.getNext2() == 0) return true;
-                        deque.insertNext(currState.getNext1());
-                        if(!currState.isNextDupe() && !currState.getVisited()) deque.insertNext(currState.getNext2());
-                    }
-                    
-                    if(deque.isPossCurrEmpty() && deque.swap()) {
-                        setStatesFalse(fsmsl);
-                        mark++;
-                        pointer = 0;
-                        deque = new Deque(fsmsl.get(1));
-                        break;
+                    if(deque.isPossCurrEmpty()) {
+                        if(!deque.swap()) {
+                            setStatesFalse(fsmsl);
+                            mark++;
+                            pointer = 0;
+                            deque = new Deque(fsmsl.get(1));
+                            break;
+                        }
+                        else if (incrementPointer){
+                            incrementPointer = false;
+                            pointer++;
+                        }
                     }
                     currState.setVisited(true);
                 }
-                
             }
-            catch(Exception e) { System.out.println("BOOM"); return false; }
-        //}
+            catch(Exception e) { return false; }
+        }
         return false;
     }
 
@@ -140,7 +136,6 @@ class FSMstate {
         this.next2 = next2;
         visited = false;
     }
-    public void printState() { System.out.println(c + ", " + next1 + ", " + next2);}
     public char getChar() { return this.c; }
     public int getNext1(){ return this.next1; }
     public int getNext2() { return this.next2; }
