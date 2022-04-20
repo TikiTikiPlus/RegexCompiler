@@ -20,8 +20,9 @@ public class Main {
     static int nextPhrase1;
     //nextPhrase2 is the one that looks behind IF you need to look from behind
     static int nextPhrase2;
-    public static int startState;
+    public static int startState=1;
     static state newState;
+    static state wholeState;
     public static void main(String[] args) {
         FiniteStateMachine = new ArrayList<>();
         String nonLiteralString = "*?+|()[]";
@@ -48,13 +49,12 @@ public class Main {
 //            fsm = new state(bracketList.get(bracketList.size()-1), ' ', 0,0);
             return fsm;
         }
+
         fsm = term(expressionS);
         //FiniteStateMachine.add(fsm);
         if (globalInt < expressionS.length()) {
             if (expressionS.charAt(globalInt) != '\0' && valid) {
-
                 fsm = expression(expressionS);
-                //globalInt++;
             }
         }
         return fsm;
@@ -73,12 +73,13 @@ public class Main {
             //if you have a double star or double question mark, return error
             //if globalint + 1 is greater than size
             if (s.charAt(globalInt) == '*') {
-                //get next phrase
+                //get nexzt phrase
                 nextPhrase1 = stateInt + 1;
-                System.out.println(startState);
                 if(s.charAt(globalInt-1)==')') {
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState+1, nextPhrase1);
-                    newState = FiniteStateMachine.get(startState);
+                    //change where the start state is pointing?
+                    //but when
+                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState, stateInt+1);
+                    newState = FiniteStateMachine.get(startState-1);
                 }
                 else
                 {
@@ -144,47 +145,44 @@ public class Main {
             else if (s.charAt(globalInt) == '|') {
                 //if the or statement is in a bracket,
                 //change the start state of the bracket to be the or statement
-
-                if((s.charAt(globalInt-1)==')')||(FiniteStateMachine.get(startState)._symbol()=='|'&&bracketList.size()!=0))
+                System.out.println(startState);
+                if(bracketList.size() > 0)
                 {
-                    //set the nextPhrase1 of current fsm to be this
-                    fsm = new state(stateInt, '|', startState, stateInt + 1);
-                    //change bracketList 0? or whatever current bracketList is
-                    if(bracketList.size()!=-0) {
-                        bracketList.remove(bracketList.size() - 1);
-                    }
-                    bracketList.add(stateInt);
                     startState = bracketList.get(bracketList.size()-1);
+                    bracketList.remove(bracketList.size() - 1);
                 }
-                else {
-                    fsm = new state(stateInt, '|', startState + 1, stateInt + 1);
-                    bracketList.remove(bracketList.size()-1);
-                    bracketList.add(stateInt);
-                    startState = bracketList.get(bracketList.size()-1);
-                }
-                FiniteStateMachine.add(fsm);
+                state orState = new state(stateInt, '|', startState, stateInt+1);
+                bracketList.add(orState.stateIndex());
+                FiniteStateMachine.add(orState);
                 //get startState and change it
                 //if where the startState points, an or character is there, then set fsm nextPhraseIndex1 to be that
-                state previousState = FiniteStateMachine.get(stateInt-1);
                 globalInt++;
                 stateInt++;
+                int currInt = 0;
                 while(globalInt < s.length())
                 {
                     newState = term(s);
+                    currInt = newState.stateIndex();
                     if(globalInt<s.length())
                     {
                         if(s.charAt(globalInt)==')')
                         {
                             break;
                         }
-
                     }
                 }
-
-                if (previousState.nextPhrase2Index() == previousState.nextPhraseIndex()) {
-                    previousState.nextPhrase2Index(newState.nextPhrase2Index());
+                if(bracketList.size()> 0) {
                 }
-                previousState.nextPhraseIndex(newState.nextPhrase2Index());
+                if(!isVocab(FiniteStateMachine.get(currInt)._symbol(),s)) {
+                    orState.nextPhrase2Index(currInt);
+                }
+                //if inside a bracket/
+                if(FiniteStateMachine.get(0).nextPhraseIndex()==FiniteStateMachine.get(0).nextPhrase2Index())
+                {
+                    FiniteStateMachine.get(0).nextPhraseIndex(orState.stateIndex());
+                }
+                FiniteStateMachine.get(0).nextPhrase2Index(orState.stateIndex());
+                return orState;
             }
         }
         return fsm;
@@ -199,16 +197,21 @@ public class Main {
                 FiniteStateMachine.add(fsm);
                 stateInt++;
                 globalInt++;
+                if(s.charAt(globalInt-1)=='\\')
+                {
+                    state escapeState = new state(FiniteStateMachine.size(), s.charAt(globalInt), stateInt + 1, stateInt + 1);
+                    FiniteStateMachine.add(escapeState);
+                    stateInt++;
+                    globalInt++;
+                }
             }
             else {
                 if (s.charAt(globalInt) == '(') {
                     globalInt++;
-                    addState = stateInt+1;
+                    addState = stateInt;
                     bracketList.add(addState);
-                    state newState = FiniteStateMachine.get(stateInt);
                     fsm = expression(s);
                     startState = bracketList.get(bracketList.size()-1);
-
                     if (s.charAt(globalInt) == ')' && bracketList.size() > 0) {
                         globalInt++;
                         bracketList.remove(bracketList.size() - 1);
@@ -222,11 +225,11 @@ public class Main {
         //term(s);
         return fsm;
     }
-
     public static void parse(String s) {
         fsm = new state(stateInt, '\0', 1, 1);
         FiniteStateMachine.add(fsm);
         stateInt++;
+        startState = stateInt;
         expression(s);
         if (globalInt < s.length()) {
             if (s.charAt(globalInt) != '\0') {
@@ -241,17 +244,26 @@ public class Main {
             }
         }
     }
-
     //if the character is not a symbol
     public static boolean isVocab(char c, String s) {
         //normal check is if there is a special character or not
         //checks if the previous character is escape character. if so, then return true
-        if (nonLiterals.contains(c)) {
-            return false;
-        } else if (globalInt > 0) {
-            if (s.charAt(globalInt) == '\\') {
-                return true;
+        if(globalInt<s.length()) {
+            if (nonLiterals.contains(c)) {
+                return false;
+            } else if (globalInt > 0) {
+                if (s.charAt(globalInt-1) == '\\') {
+                    return true;
+                }
             }
+        }
+        else
+        {
+            if(nonLiterals.contains(c))
+            {
+                return false;
+            }
+            return true;
         }
         return true;
     }
