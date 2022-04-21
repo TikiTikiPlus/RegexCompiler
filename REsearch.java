@@ -1,13 +1,12 @@
 import java.util.*;
-
 import java.io.*;
 
 public class REsearch {
     public static void main(String args[]) {  
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));   // Buffered reader for reading input
-        ArrayList<FSMstate> fsmStateList = new ArrayList<FSMstate>();
-        ArrayList<String> stringArr = new ArrayList<String>();
-        String input = "";
+        ArrayList<FSMstate> fsmStateList = new ArrayList<FSMstate>();   // Stores the states that represent the regex
+        ArrayList<String> stringArr = new ArrayList<String>();  // Stores strings to be compared with the regex
+        String input = "";  // Temporarily stores input from reading
 
         try {   // try catch that reads the text file from the command line
             File file = new File(args[0]);
@@ -22,10 +21,8 @@ public class REsearch {
             System.out.println("Error, file does not exist.");
             return;
         }
-
-        fsmStateList.add(new FSMstate('\0', -1, -1));
-
-        while(input != null) {  // loop that reads the ouput from the compiler and stores it
+        
+        while(input != null) {  // loop that reads the output from the compiler and stores it
             try {
                 input = br.readLine();
                 String[] inputArr = input.split(",");
@@ -36,13 +33,21 @@ public class REsearch {
             catch(Exception e) {}
         }
 
-        for(int i = 0; i < stringArr.size(); i++) {
+
+
+        for(int i = 0; i < stringArr.size(); i++) { // for loop that prints out the values in stringArr that match the regex
             if(checkLine(fsmStateList, stringArr.get(i))) System.out.println(stringArr.get(i));
         }
     }  
 
+    /**
+     * Checks if a string matches with the regex
+     * @param fsmsl the list of states that represent the regex
+     * @param s string to be checked
+     * @return
+     */
     public static boolean checkLine(ArrayList<FSMstate> fsmsl, String s) {
-        Deque deque = new Deque(fsmsl.get(1));
+        Deque deque = new Deque(fsmsl.get(0));
         char[] chArr = s.toCharArray();
         int mark = 0;
         int pointer = 0;
@@ -53,18 +58,24 @@ public class REsearch {
                 while(true) {
                     int stateNum = deque.popCurr();
                     FSMstate currState = fsmsl.get(stateNum);
-                    if(currState.getChar() == chArr[mark+pointer] || currState.getChar() == '.' || currState.getChar() == '+') {
+                    if(currState.getChar() == chArr[mark+pointer] || currState.getChar() == '.' || currState.getChar() == '|') {
+                        
+                        if(currState.getNext1() == 0 && currState.getNext2() == 0) {
+                            setStatesFalse(fsmsl);
+                            return true;
+                        }
                         if(currState.getChar() == chArr[mark+pointer] || currState.getChar() == '.') incrementPointer = true;
-                        if(currState.getNext1() == 0 && currState.getNext2() == 0) return true;
-                        if(!currState.getVisited()) deque.insertNext(currState.getNext1());
-                        if(!currState.isNextDupe() && !currState.getVisited()) deque.insertNext(currState.getNext2());
+                        if(!currState.getVisited()) {
+                            deque.insertNext(currState.getNext1());
+                            if(!currState.isNextDupe()) deque.insertNext(currState.getNext2());
+                        }
                     }
                     if(deque.isPossCurrEmpty()) {
                         if(!deque.swap()) {
                             setStatesFalse(fsmsl);
                             mark++;
                             pointer = 0;
-                            deque = new Deque(fsmsl.get(1));
+                            deque = new Deque(fsmsl.get(0));
                             break;
                         }
                         else if (incrementPointer){
@@ -96,18 +107,13 @@ class Deque {
         if(fsms.getNext1() != fsms.getNext2()) possCurr.add(fsms.getNext1());
     }
 
+    /**
+     * Pops the top value off the stack and returns the value
+     * @return
+     */
     public int popCurr() { 
         try { return possCurr.pop(); }
         catch(Exception e) { return -1; }
-    }
-
-    public void insertNext(int i) { possNext.add(i); }
-
-    public boolean isPossCurrEmpty() { return possCurr.isEmpty(); }
-
-    public void printStack() {
-        String values = Arrays.toString(possCurr.toArray());
-        System.out.println(values);
     }
 
     /**
@@ -122,6 +128,9 @@ class Deque {
         }
         return true;
     }
+
+    public boolean isPossCurrEmpty() { return possCurr.isEmpty(); } // returns if the stack is empty or not
+    public void insertNext(int i) { possNext.add(i); }  // inserts a new value into the queue
 }
 
 class FSMstate {
@@ -136,10 +145,13 @@ class FSMstate {
         this.next2 = next2;
         visited = false;
     }
+
+    // get and set methods
     public char getChar() { return this.c; }
     public int getNext1(){ return this.next1; }
     public int getNext2() { return this.next2; }
     public boolean getVisited() { return visited; }
     public void setVisited(boolean b) { visited = b;}
-    public boolean isNextDupe() { return this.next1 == this.next2; }
+
+    public boolean isNextDupe() { return this.next1 == this.next2; } // returns if the next states are the same or not
 }
