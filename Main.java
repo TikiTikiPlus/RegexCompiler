@@ -1,5 +1,3 @@
-package com.company;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -99,7 +97,7 @@ public class Main {
             else if (s.charAt(globalInt) == '+') {
                 //get next phrase
                 nextPhrase1 = stateInt + 1;
-                System.out.println(startState);
+                //System.out.println(startState);
                 if(s.charAt(globalInt-1)==')') {
                     //start at either the where the brackets start or exit
                     //so make startState get changed
@@ -124,7 +122,7 @@ public class Main {
             else if (s.charAt(globalInt) == '?') {
                 //get next phrase
                 nextPhrase1 = stateInt + 1;
-                System.out.println(startState);
+                //System.out.println(startState);
                 if(s.charAt(globalInt-1)==')') {
                     fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState+1, nextPhrase1);
                     newState = FiniteStateMachine.get(startState);
@@ -145,7 +143,7 @@ public class Main {
             else if (s.charAt(globalInt) == '|') {
                 //if the or statement is in a bracket,
                 //change the start state of the bracket to be the or statement
-                System.out.println(startState);
+                //System.out.println(startState);
                 if(bracketList.size() > 0)
                 {
                     startState = bracketList.get(bracketList.size()-1);
@@ -226,7 +224,7 @@ public class Main {
         return fsm;
     }
     public static void parse(String s) {
-        fsm = new state(stateInt, '\0', 1, 1);
+        fsm = new state(stateInt, '|', 1, 1);
         FiniteStateMachine.add(fsm);
         stateInt++;
         startState = stateInt;
@@ -237,10 +235,10 @@ public class Main {
             }
         }
 
-        FiniteStateMachine.add(new state(FiniteStateMachine.size(), '\0', 0, 0));
+        FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
         if (valid) {
             for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
-                System.out.println("Index: " + FiniteStateMachine.get(fsmIndex).stateIndex() + ", symbol: " + FiniteStateMachine.get(fsmIndex)._symbol() + ", np1:  " + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + ", np2: " + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
+                System.out.println(FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
             }
         }
     }
