@@ -52,11 +52,13 @@ public class Main {
         }
         fsm = term(expressionS);
         //FiniteStateMachine.add(fsm);
+
         if (globalInt < expressionS.length()) {
             if (expressionS.charAt(globalInt) != '\0' && valid) {
                 fsm = expression(expressionS);
             }
         }
+
         return fsm;
     }
 
@@ -143,6 +145,7 @@ public class Main {
             else if (s.charAt(globalInt) == '|') {
                 //if the or statement is in a bracket,
                 //change the start state of the bracket to be the or statement
+
                 state orState = new state(stateInt, '|', startState, stateInt+1);
                 if(bracketList.size() > 0)
                 {
@@ -221,6 +224,16 @@ public class Main {
         }
         FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
         if (valid) {
+            if(bracketList.size()>0)
+            {
+                //change the start the state
+                fsm = FiniteStateMachine.get(0);
+                if(fsm.nextPhrase2Index() == fsm.nextPhraseIndex())
+                {
+                    fsm.nextPhraseIndex(bracketList.get(0));
+                }
+                fsm.nextPhrase2Index(bracketList.get(0));
+            }
             for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
                 System.out.println(FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
             }
