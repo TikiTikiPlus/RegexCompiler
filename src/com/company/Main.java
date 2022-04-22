@@ -161,6 +161,7 @@ public class Main {
                 if(s.charAt(globalInt)=='(') {
                     orState.nextPhrase2Index(Disjunction(s).stateIndex());
                 }
+
                 return orState;
             }
         }
@@ -195,8 +196,17 @@ public class Main {
                     addState = stateInt;
                     bracketList.add(addState);
                     startState = bracketList.get(bracketList.size()-1);
-                    System.out.println(startState);
                     fsm = expression(s);
+                    if(FiniteStateMachine.get(startState)._symbol()=='|')
+                    {
+                        //get the state where or statement starts
+                        state changeState = FiniteStateMachine.get(FiniteStateMachine.get(startState).nextPhraseIndex()-1);
+                        if(changeState.nextPhraseIndex()== changeState.nextPhrase2Index())
+                        {
+                            changeState.nextPhraseIndex(startState);
+                        }
+                        changeState.nextPhrase2Index(startState);
+                    }
                     if (s.charAt(globalInt) == ')' && bracketList.size() > 0) {
                         globalInt++;
                         startState = bracketList.get(bracketList.size()-1);
@@ -234,9 +244,11 @@ public class Main {
                 }
                 fsm.nextPhrase2Index(bracketList.get(0));
             }
+
             for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
                 System.out.println(FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
             }
+            updateAll();
         }
     }
     //if the character is not a symbol
@@ -266,5 +278,14 @@ public class Main {
     public static void error() {
         System.err.print("Invalid expression");
         valid = false;
+    }
+    public static void updateAll()
+    {
+        state updateState = null;
+        for(int x: bracketList)
+        {
+               updateState = FiniteStateMachine.get(x);
+
+        }
     }
 }
