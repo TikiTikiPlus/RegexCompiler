@@ -7,6 +7,7 @@ import java.util.ArrayList;
 public class Main {
     static ArrayList<state> FiniteStateMachine;
     static String input = "";
+    //the variable that is responsible for looking at the string input
     static int globalInt = 0;
     static int addState = 0;
     static int stateInt = 0;
@@ -25,6 +26,7 @@ public class Main {
     static state wholeState;
     public static void main(String[] args) {
         FiniteStateMachine = new ArrayList<>();
+
         String nonLiteralString = "*?+|()[]";
         for (int i = 0; i < nonLiteralString.length(); i++) {
             nonLiterals.add(nonLiteralString.charAt(i));
@@ -46,13 +48,12 @@ public class Main {
 
     public static state expression(String expressionS) {
         if (expressionS.charAt(globalInt) == ')') {
-//            fsm = new state(bracketList.get(bracketList.size()-1), ' ', 0,0);
             startState = bracketList.get(bracketList.size()-1);
+            //returns the start of the state of brackets
+            //this is also used to check where the or statement is
             return FiniteStateMachine.get(startState);
         }
         fsm = term(expressionS);
-        //FiniteStateMachine.add(fsm);
-
         if (globalInt < expressionS.length()) {
             if (expressionS.charAt(globalInt) != '\0' && valid) {
                 fsm = expression(expressionS);
@@ -76,10 +77,8 @@ public class Main {
             //if globalint + 1 is greater than size
             if (s.charAt(globalInt) == '*') {
                 //get nexzt phrase
-                nextPhrase1 = stateInt + 1;
                 if(s.charAt(globalInt-1)==')') {
-                    //change where the start state is pointing?
-                    //but when
+
                     fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState, stateInt+1);
                     newState = FiniteStateMachine.get(startState-1);
                 }
@@ -90,6 +89,7 @@ public class Main {
                 }
                 FiniteStateMachine.add(fsm);
                 //updates the state * is pointing to
+                //if the next phrases point to the same one, we know they are literals
                 if(newState.nextPhraseIndex() == newState.nextPhrase2Index())
                 {
                     newState.nextPhraseIndex(fsm.stateIndex());
@@ -143,25 +143,31 @@ public class Main {
             //checks if the character is an or sign
             //also checks if the or sign is adjacent to each other
             else if (s.charAt(globalInt) == '|') {
-                //if the or statement is in a bracket,
-                //change the start state of the bracket to be the or statement
-
+                //since start state is set to 1 by default, the start state will always change to this
+                //you always point to the next state forward for phrase 2. If there is a special character
+                //that needs to point somewhere else, that special character will be the one that is in charge
+                //of it.
                 state orState = new state(stateInt, '|', startState, stateInt+1);
                 if(bracketList.size() > 0)
                 {
+                    //if you are in the or statement, it changes where the start
+                    //state of this expression to the current or statement.
                     bracketList.remove(bracketList.size() - 1);
                 }
                 bracketList.add(orState.stateIndex());
+
                 FiniteStateMachine.add(orState);
+                //since it changes the start state of the expression, we add
+                //the or state to the arraylist that handles the start states
                 startState = bracketList.get(bracketList.size()-1);
                 //get startState and change it
                 //if where the startState points, an or character is there, then set fsm nextPhraseIndex1 to be that
                 globalInt++;
                 stateInt++;
                 if(s.charAt(globalInt)=='(') {
+                    //if the next phrase is an expression, get the state index of that is returned.
                     orState.nextPhrase2Index(Disjunction(s).stateIndex());
                 }
-
                 return orState;
             }
         }
@@ -170,7 +176,6 @@ public class Main {
     public static state Disjunction(String s)
     {
         state tempState = term(s);
-        //should return start state
         return FiniteStateMachine.get(tempState.stateIndex());
     }
     public static state factor(String s) {
@@ -197,16 +202,6 @@ public class Main {
                     bracketList.add(addState);
                     startState = bracketList.get(bracketList.size()-1);
                     fsm = expression(s);
-                    if(FiniteStateMachine.get(startState)._symbol()=='|')
-                    {
-                        //get the state where or statement starts
-                        state changeState = FiniteStateMachine.get(FiniteStateMachine.get(startState).nextPhraseIndex()-1);
-                        if(changeState.nextPhraseIndex()== changeState.nextPhrase2Index())
-                        {
-                            changeState.nextPhraseIndex(startState);
-                        }
-                        changeState.nextPhrase2Index(startState);
-                    }
                     if (s.charAt(globalInt) == ')' && bracketList.size() > 0) {
                         globalInt++;
                         startState = bracketList.get(bracketList.size()-1);
@@ -234,9 +229,11 @@ public class Main {
         }
         FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
         if (valid) {
+            //checks the first occurence of a start state
+
             if(bracketList.size()>0)
             {
-                //change the start the state
+                //change where start happens
                 fsm = FiniteStateMachine.get(0);
                 if(fsm.nextPhrase2Index() == fsm.nextPhraseIndex())
                 {
