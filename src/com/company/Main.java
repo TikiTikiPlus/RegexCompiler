@@ -23,7 +23,7 @@ public class Main {
     static int nextPhrase2;
     public static int startState=1;
     static state newState;
-    static state wholeState;
+    static int endStateExpression=0;
     public static void main(String[] args) {
         FiniteStateMachine = new ArrayList<>();
 
@@ -51,6 +51,7 @@ public class Main {
             startState = bracketList.get(bracketList.size()-1);
             //returns the start of the state of brackets
             //this is also used to check where the or statement is
+            endStateExpression = stateInt;
             return FiniteStateMachine.get(startState);
         }
         fsm = term(expressionS);
@@ -84,7 +85,7 @@ public class Main {
                 }
                 else
                 {
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), nextPhrase1, stateInt-1);
+                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), stateInt+1, stateInt-1);
                     newState = FiniteStateMachine.get(stateInt - 2);
                 }
                 FiniteStateMachine.add(fsm);
@@ -164,9 +165,15 @@ public class Main {
                 //if where the startState points, an or character is there, then set fsm nextPhraseIndex1 to be that
                 globalInt++;
                 stateInt++;
+                state orStatePreviousState = FiniteStateMachine.get(orState.stateIndex()-1);
                 if(s.charAt(globalInt)=='(') {
                     //if the next phrase is an expression, get the state index of that is returned.
                     orState.nextPhrase2Index(Disjunction(s).stateIndex());
+                }
+                else
+                {
+                    orStatePreviousState.nextPhrase2Index(Disjunction(s).stateIndex());
+                    orStatePreviousState.nextPhraseIndex(orStatePreviousState.nextPhrase2Index());
                 }
                 return orState;
             }
@@ -175,7 +182,7 @@ public class Main {
     }
     public static state Disjunction(String s)
     {
-        state tempState = term(s);
+        state tempState = expression(s);
         return FiniteStateMachine.get(tempState.stateIndex());
     }
     public static state factor(String s) {
@@ -201,10 +208,14 @@ public class Main {
                     addState = stateInt;
                     bracketList.add(addState);
                     startState = bracketList.get(bracketList.size()-1);
+                    int currState = stateInt;
                     fsm = expression(s);
+                    state newState = FiniteStateMachine.get(currState-1);
                     if (s.charAt(globalInt) == ')' && bracketList.size() > 0) {
                         globalInt++;
                         startState = bracketList.get(bracketList.size()-1);
+                        newState.nextPhraseIndex(startState);
+                        newState.nextPhrase2Index(startState);
                         bracketList.remove(bracketList.size() - 1);
                     } else {
                         error();
