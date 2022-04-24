@@ -1,7 +1,4 @@
 package com.company;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Main {
@@ -105,7 +102,7 @@ public class Main {
                 if(s.charAt(globalInt-1)==')') {
                     //start at either the where the brackets start or exit
                     //so make startState get changed
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState+1, nextPhrase1);
+                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState, nextPhrase1);
                     newState = FiniteStateMachine.get(startState);
                 }
                 else
@@ -127,7 +124,7 @@ public class Main {
                 //get next phrase
                 nextPhrase1 = stateInt + 1;
                 if(s.charAt(globalInt-1)==')') {
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState+1, nextPhrase1);
+                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState, nextPhrase1);
                     newState = FiniteStateMachine.get(startState);
                 }
                 else
@@ -166,14 +163,18 @@ public class Main {
                 globalInt++;
                 stateInt++;
                 state orStatePreviousState = FiniteStateMachine.get(orState.stateIndex()-1);
+                state disjunctionState = Disjunction(s);
                 if(s.charAt(globalInt)=='(') {
                     //if the next phrase is an expression, get the state index of that is returned.
-                    orState.nextPhrase2Index(Disjunction(s).stateIndex());
+                    orState.nextPhrase2Index(disjunctionState.stateIndex());
                 }
                 else
                 {
-                    orStatePreviousState.nextPhrase2Index(Disjunction(s).stateIndex());
-                    orStatePreviousState.nextPhraseIndex(orStatePreviousState.nextPhrase2Index());
+                    int endStatement = getEndStatement(FiniteStateMachine.get(fsm.nextPhrase2Index()));
+                    if(orStatePreviousState.nextPhraseIndex()==orStatePreviousState.nextPhrase2Index()) {
+                        orStatePreviousState.nextPhrase2Index(endStatement);
+                    }
+                    orStatePreviousState.nextPhraseIndex(endStatement);
                 }
                 return orState;
             }
@@ -241,7 +242,6 @@ public class Main {
         FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
         if (valid) {
             //checks the first occurence of a start state
-
             if(bracketList.size()>0)
             {
                 //change where start happens
@@ -256,7 +256,6 @@ public class Main {
             for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
                 System.out.println(FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
             }
-            updateAll();
         }
     }
     //if the character is not a symbol
@@ -287,13 +286,13 @@ public class Main {
         System.err.print("Invalid expression");
         valid = false;
     }
-    public static void updateAll()
+    public static int getEndStatement(state EndState)
     {
-        state updateState = null;
-        for(int x: bracketList)
-        {
-               updateState = FiniteStateMachine.get(x);
 
+        if(EndState.nextPhrase2Index()<FiniteStateMachine.size()) {
+            state endState = FiniteStateMachine.get(EndState.nextPhrase2Index());
+            return getEndStatement(endState);
         }
+        return EndState.nextPhrase2Index();
     }
 }
