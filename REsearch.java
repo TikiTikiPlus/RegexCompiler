@@ -2,6 +2,7 @@ import java.util.*;
 import java.io.*;
 
 public class REsearch {
+    public static String specialChars = "?|*+[]().\\";
     public static void main(String args[]) {  
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));   // Buffered reader for reading input
         ArrayList<FSMstate> fsmStateList = new ArrayList<FSMstate>();   // Stores the states that represent the regex
@@ -33,8 +34,6 @@ public class REsearch {
             catch(Exception e) {}
         }
 
-
-
         for(int i = 0; i < stringArr.size(); i++) { // for loop that prints out the values in stringArr that match the regex
             if(checkLine(fsmStateList, stringArr.get(i))) System.out.println(stringArr.get(i));
         }
@@ -51,6 +50,7 @@ public class REsearch {
         char[] chArr = s.toCharArray();
         int mark = 0;
         int pointer = 0;
+        int nextStateLiteral = 0;
         boolean incrementPointer = false;
         while(mark < chArr.length) {
             incrementPointer = false;
@@ -58,14 +58,35 @@ public class REsearch {
                 while(true) {
                     int stateNum = deque.popCurr();
                     FSMstate currState = fsmsl.get(stateNum);
-                    if(currState.getChar() == chArr[mark+pointer] || currState.getChar() == '.' || currState.getChar() == '|') {
-                        
+                    if(currState.getChar() == chArr[mark+pointer] || currState.getChar() == '.' || currState.getChar() == '|' || currState.getChar() == '\\') {
                         if(currState.getNext1() == 0 && currState.getNext2() == 0) {
                             setStatesFalse(fsmsl);
                             return true;
                         }
+
                         if(currState.getChar() == chArr[mark+pointer] || currState.getChar() == '.') incrementPointer = true;
-                        if(!currState.getVisited()) {
+                        
+                        if(!currState.getVisited() && fsmsl.get(stateNum).getChar() == '\\' && nextStateLiteral == 0 && chArr[mark+pointer] == '\\') {
+                            if(fsmsl.get(stateNum + 1).getChar() == '\\') {  
+                                currState = fsmsl.get(stateNum + 1);
+                                incrementPointer = true;
+                                nextStateLiteral = 0;  
+                                deque.insertNext(currState.getNext1());
+                                if(!currState.isNextDupe()) deque.insertNext(currState.getNext2());  
+                            }
+                            else {
+                                nextStateLiteral = stateNum + 1;
+                                deque.insertNext(currState.getNext1());
+                                if(!currState.isNextDupe()) deque.insertNext(currState.getNext2());
+                            }
+                        }
+                        else if(!currState.getVisited() && currState.getChar() == chArr[mark+pointer] && stateNum == nextStateLiteral) {
+                            incrementPointer = true;
+                            nextStateLiteral = 0;  
+                            deque.insertNext(currState.getNext1());
+                            if(!currState.isNextDupe()) deque.insertNext(currState.getNext2());  
+                        }
+                        else if(!currState.getVisited() && fsmsl.get(stateNum - 1).getChar() != '\\') {
                             deque.insertNext(currState.getNext1());
                             if(!currState.isNextDupe()) deque.insertNext(currState.getNext2());
                         }
@@ -106,7 +127,7 @@ class Deque {
         possCurr.add(fsms.getNext2());
         if(fsms.getNext1() != fsms.getNext2()) possCurr.add(fsms.getNext1());
     }
-
+    
     /**
      * Pops the top value off the stack and returns the value
      * @return
@@ -131,6 +152,7 @@ class Deque {
 
     public boolean isPossCurrEmpty() { return possCurr.isEmpty(); } // returns if the stack is empty or not
     public void insertNext(int i) { possNext.add(i); }  // inserts a new value into the queue
+    public int possCurrLength() { return possCurr.size(); }
 }
 
 class FSMstate {
