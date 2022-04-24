@@ -41,23 +41,51 @@ public class Main {
             }
         }
         parse(input);
-
     }
     //find an expression
     //output a Term first before expression
 
-    public static state expression(String expressionS) throws Exception {
-        if (expressionS.charAt(globalInt) == ')') {
+    public static state expression(String s) throws Exception {
+        if (s.charAt(globalInt) == ')') {
             startState = bracketList.get(bracketList.size()-1);
             //returns the start of the state of brackets
             //this is also used to check where the or statement is
             endStateExpression = stateInt;
             return FiniteStateMachine.get(startState);
         }
-        fsm = term(expressionS);
-        if (globalInt < expressionS.length()) {
-            if (expressionS.charAt(globalInt) != '\0' && valid) {
-                fsm = expression(expressionS);
+        if(s.charAt(globalInt)=='[')
+        {
+            int squareMarker = globalInt;
+            input =  input.substring(0, squareMarker) + '(' + input.substring(squareMarker + 1);
+            s = s.substring(0, squareMarker) + '(' + s.substring(squareMarker + 1);
+            while(squareMarker<s.length())
+            {
+
+                squareMarker++;
+                StringBuffer stringBuffer = new StringBuffer(input);
+                // insert() method where position of character to be
+                // inserted is specified as in arguments
+                stringBuffer.insert(squareMarker, '\\');
+                input = stringBuffer.toString();
+                s = stringBuffer.toString();
+                squareMarker++;
+                squareMarker++;
+
+                if(s.charAt(squareMarker)==']')
+                {
+                    break;
+                }
+                s = stringBuffer.toString();
+                stringBuffer.insert(squareMarker, '|');
+                input = stringBuffer.toString();
+            }
+            input =  input.substring(0, squareMarker) + ')' + input.substring(squareMarker + 1);
+            s = s.substring(0, squareMarker) + ')' + s.substring(squareMarker + 1);
+        }
+        fsm = term(s);
+        if (globalInt < s.length()) {
+            if (s.charAt(globalInt) != '\0' && valid) {
+                fsm = expression(s);
             }
         }
 
@@ -79,7 +107,6 @@ public class Main {
             if (s.charAt(globalInt) == '*') {
                 //get nexzt phrase
                 if(s.charAt(globalInt-1)==')') {
-
                     fsm = new state(FiniteStateMachine.size(), '|', startState, stateInt + 1);
                     newState = FiniteStateMachine.get(startState - 1);
                 }
@@ -190,14 +217,16 @@ public class Main {
                 fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), stateInt + 1, stateInt + 1);
                 FiniteStateMachine.add(fsm);
                 globalInt++;
-                if(s.charAt(globalInt)=='\\')
-                {
-                    state escapeState = new state(stateInt, s.charAt(globalInt), stateInt + 1, stateInt + 1);
-                    FiniteStateMachine.add(escapeState);
-                    stateInt++;
-                    globalInt++;
-                }
                 stateInt++;
+                if(globalInt<s.length()) {
+                    if (s.charAt(globalInt) == '\\') {
+                        state escapeState = new state(stateInt, s.charAt(globalInt), stateInt + 1, stateInt + 1);
+                        FiniteStateMachine.add(escapeState);
+                        stateInt++;
+                        globalInt++;
+                    }
+                }
+
             }
             else {
                 if (s.charAt(globalInt) == '(') {
@@ -219,7 +248,6 @@ public class Main {
                         bracketList.remove(bracketList.size() - 1);
                         //for each states that point to the dummy start state,
                         //change that start states of these states
-
                         for(int i = 0; i< FiniteStateMachine.size(); i++)
                         {
                             state x = FiniteStateMachine.get(i);
@@ -235,7 +263,8 @@ public class Main {
                             }
                         }
                         System.out.println(dummyEnd.stateIndex());
-                    } else {
+                    }
+                    else {
                         error();
                     }
                 }
