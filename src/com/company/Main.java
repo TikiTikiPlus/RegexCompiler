@@ -122,7 +122,7 @@ public class Main {
                 if(s.charAt(globalInt-1)==')') {
                     fsm = new state(FiniteStateMachine.size(), '|',startState, nextPhrase1);
                     newState = FiniteStateMachine.get(startState-1);
-                    FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt);
+                    //FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt);
                 }
                 else
                 {
@@ -213,8 +213,6 @@ public class Main {
                     if (s.charAt(globalInt) == ')' && bracketList.size() > 0) {
                         globalInt++;
                         startState = bracketList.get(bracketList.size()-1);
-                        newState.nextPhraseIndex(startState);
-                        newState.nextPhrase2Index(startState);
                         dummyStartInt = dummyStart.stateIndex();
                         state dummyEnd = FiniteStateMachine.get(stateInt-1);
                         dummyEndInt = dummyEnd.stateIndex();
@@ -225,7 +223,7 @@ public class Main {
                         for(int i = 0; i< FiniteStateMachine.size(); i++)
                         {
                             state x = FiniteStateMachine.get(i);
-                            if(x.nextPhrase2Index()==dummyStartInt+1)
+                            if(x.nextPhrase2Index()==dummyStartInt+1 && isVocab(x._symbol(),s))
                             {
                                 System.out.println(x.stateIndex() + "," + x._symbol() + ","+x.nextPhraseIndex() + "," + x.nextPhrase2Index());
                                 System.out.println("Start state "+startState);
