@@ -1,4 +1,5 @@
 package com.company;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Main {
@@ -21,7 +22,7 @@ public class Main {
     public static int startState=1;
     static state newState;
     static int endStateExpression=0;
-    public static void main(String[] args) {
+    public static void main(String[] args)  throws Exception{
         FiniteStateMachine = new ArrayList<>();
 
         String nonLiteralString = "*?+|()[]";
@@ -43,7 +44,7 @@ public class Main {
     //find an expression
     //output a Term first before expression
 
-    public static state expression(String expressionS) {
+    public static state expression(String expressionS) throws Exception {
         if (expressionS.charAt(globalInt) == ')') {
             startState = bracketList.get(bracketList.size()-1);
             //returns the start of the state of brackets
@@ -61,7 +62,7 @@ public class Main {
         return fsm;
     }
 
-    public static state term(String s) {
+    public static state term(String s)  throws Exception{
         fsm = factor(s);
         //newState = expression(s);
         //if symbol at pointer is a * or ?
@@ -164,13 +165,13 @@ public class Main {
                 stateInt++;
                 state orStatePreviousState = FiniteStateMachine.get(orState.stateIndex()-1);
                 state disjunctionState = Disjunction(s);
-                if(s.charAt(globalInt)=='(') {
+                if(globalInt<s.length() && s.charAt(globalInt)=='(') {
                     //if the next phrase is an expression, get the state index of that is returned.
                     orState.nextPhrase2Index(disjunctionState.stateIndex());
                 }
                 else
                 {
-                    int endStatement = getEndStatement(FiniteStateMachine.get(fsm.nextPhrase2Index()));
+                    int endStatement = getEndStatement(FiniteStateMachine.get(fsm.stateIndex()));
                     if(orStatePreviousState.nextPhraseIndex()==orStatePreviousState.nextPhrase2Index()) {
                         orStatePreviousState.nextPhrase2Index(endStatement);
                     }
@@ -181,12 +182,12 @@ public class Main {
         }
         return fsm;
     }
-    public static state Disjunction(String s)
+    public static state Disjunction(String s) throws Exception
     {
         state tempState = expression(s);
         return FiniteStateMachine.get(tempState.stateIndex());
     }
-    public static state factor(String s) {
+    public static state factor(String s) throws Exception {
         if (globalInt < s.length()) {
             //checks if the character doesnt have special meanings
             if (isVocab(s.charAt(globalInt), s)) {
@@ -228,12 +229,12 @@ public class Main {
         //term(s);
         return fsm;
     }
-    public static void parse(String s) {
+    public static void parse(String s) throws Exception {
         fsm = new state(stateInt, '|', 1, 1);
         FiniteStateMachine.add(fsm);
         stateInt++;
         startState = stateInt;
-        expression(s);
+        fsm = expression(s);
         if (globalInt < s.length()) {
             if (s.charAt(globalInt) != '\0') {
                 error();
@@ -259,7 +260,7 @@ public class Main {
         }
     }
     //if the character is not a symbol
-    public static boolean isVocab(char c, String s) {
+    public static boolean isVocab(char c, String s) throws Exception {
         //normal check is if there is a special character or not
         //checks if the previous character is escape character. if so, then return true
         if(globalInt<s.length()) {
@@ -286,7 +287,7 @@ public class Main {
         System.err.print("Invalid expression");
         valid = false;
     }
-    public static int getEndStatement(state EndState)
+    public static int getEndStatement(state EndState) throws Exception
     {
 
         if(EndState.nextPhrase2Index()<FiniteStateMachine.size()) {
