@@ -126,7 +126,7 @@ public class Main {
                 nextPhrase1 = stateInt + 1;
                 if(s.charAt(globalInt-1)==')') {
                     fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState, nextPhrase1);
-                    newState = FiniteStateMachine.get(startState);
+                    newState = FiniteStateMachine.get(startState-1);
                 }
                 else
                 {
