@@ -53,6 +53,7 @@ public class Main {
             endStateExpression = stateInt;
             return FiniteStateMachine.get(startState);
         }
+
         if(s.charAt(globalInt)=='[')
         {
             int squareMarker = globalInt;
@@ -219,7 +220,7 @@ public class Main {
                 globalInt++;
                 stateInt++;
                 if(globalInt<s.length()) {
-                    if (s.charAt(globalInt) == '\\') {
+                    if (s.charAt(globalInt-1) == '\\') {
                         state escapeState = new state(stateInt, s.charAt(globalInt), stateInt + 1, stateInt + 1);
                         FiniteStateMachine.add(escapeState);
                         stateInt++;
@@ -336,7 +337,14 @@ public class Main {
     {
 
         if(EndState.nextPhrase2Index()<FiniteStateMachine.size()&&EndState.nextPhraseIndex()<FiniteStateMachine.size()) {
-            state endState = FiniteStateMachine.get(EndState.nextPhrase2Index());
+            state endState;
+            if(EndState.nextPhrase2Index()< EndState.nextPhraseIndex())
+            {
+                endState = FiniteStateMachine.get(EndState.nextPhraseIndex());
+            }
+            else {
+                endState = FiniteStateMachine.get(EndState.nextPhrase2Index());
+            }
             return getEndStatement(endState);
         }
         return EndState.nextPhrase2Index();
