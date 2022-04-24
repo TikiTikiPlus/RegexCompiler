@@ -22,6 +22,8 @@ public class Main {
     public static int startState=1;
     static state newState;
     static int endStateExpression=0;
+    static int dummyStartInt=0;
+    static int dummyEndInt=0;
     public static void main(String[] args)  throws Exception{
         FiniteStateMachine = new ArrayList<>();
 
@@ -78,8 +80,13 @@ public class Main {
                 //get nexzt phrase
                 if(s.charAt(globalInt-1)==')') {
 
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState, stateInt+1);
-                    newState = FiniteStateMachine.get(startState-1);
+                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), startState, stateInt + 1);
+                    newState = FiniteStateMachine.get(startState - 1);
+                    if (FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt) == FiniteStateMachine.get(dummyStartInt).nextPhrase2Index(stateInt))
+                    {
+                        FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt);
+                    }
+                    FiniteStateMachine.get(dummyStartInt).nextPhrase2Index(stateInt);
                 }
                 else
                 {
@@ -105,6 +112,11 @@ public class Main {
                     //so make startState get changed
                     fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState, nextPhrase1);
                     newState = FiniteStateMachine.get(startState);
+                    if (FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt) == FiniteStateMachine.get(dummyStartInt).nextPhrase2Index(stateInt))
+                    {
+                        FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt);
+                    }
+                    FiniteStateMachine.get(dummyStartInt).nextPhrase2Index(stateInt);
                 }
                 else
                 {
@@ -112,7 +124,7 @@ public class Main {
                     newState = FiniteStateMachine.get(stateInt - 2);
                 }
                 FiniteStateMachine.add(fsm);
-                //updates the state * is pointing to
+                //updates the state + is pointing to
                 if(newState.nextPhraseIndex() == newState.nextPhrase2Index())
                 {
                     newState.nextPhraseIndex(fsm.stateIndex());
@@ -127,6 +139,7 @@ public class Main {
                 if(s.charAt(globalInt-1)==')') {
                     fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState, nextPhrase1);
                     newState = FiniteStateMachine.get(startState-1);
+                    FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt);
                 }
                 else
                 {
@@ -154,7 +167,6 @@ public class Main {
                     bracketList.remove(bracketList.size() - 1);
                 }
                 bracketList.add(orState.stateIndex());
-
                 FiniteStateMachine.add(orState);
                 //since it changes the start state of the expression, we add
                 //the or state to the arraylist that handles the start states
@@ -210,6 +222,8 @@ public class Main {
                     addState = stateInt;
                     bracketList.add(addState);
                     startState = bracketList.get(bracketList.size()-1);
+                    state dummyStart = FiniteStateMachine.get(stateInt-1);
+                    dummyStartInt = dummyStart.stateIndex();
                     int currState = stateInt;
                     fsm = expression(s);
                     state newState = FiniteStateMachine.get(currState-1);
@@ -218,6 +232,11 @@ public class Main {
                         startState = bracketList.get(bracketList.size()-1);
                         newState.nextPhraseIndex(startState);
                         newState.nextPhrase2Index(startState);
+                        dummyStartInt = dummyStart.stateIndex();
+                        System.out.println(dummyStartInt);
+                        state dummyEnd = FiniteStateMachine.get(stateInt-1);
+                        dummyEndInt = dummyEnd.stateIndex();
+                        System.out.println(dummyEnd.stateIndex());
                         bracketList.remove(bracketList.size() - 1);
                     } else {
                         error();
