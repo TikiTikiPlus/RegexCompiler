@@ -113,7 +113,7 @@ public class Main {
                 }
                 else
                 {
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), stateInt+1, stateInt-1);
+                    fsm = new state(FiniteStateMachine.size(),'|', stateInt+1, stateInt-1);
                     newState = FiniteStateMachine.get(stateInt - 2);
                 }
                 FiniteStateMachine.add(fsm);
@@ -137,7 +137,7 @@ public class Main {
                 }
                 else
                 {
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), nextPhrase1, stateInt-1);
+                    fsm = new state(FiniteStateMachine.size(),'|', nextPhrase1, stateInt-1);
                 }
                 FiniteStateMachine.add(fsm);
                 //updates the state + is pointing to
@@ -154,7 +154,7 @@ public class Main {
                 }
                 else
                 {
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), nextPhrase1, stateInt-1);
+                    fsm = new state(FiniteStateMachine.size(), '|', nextPhrase1, stateInt-1);
                     newState = FiniteStateMachine.get(stateInt - 2);
                 }
                 newState.nextPhraseIndex(stateInt);
