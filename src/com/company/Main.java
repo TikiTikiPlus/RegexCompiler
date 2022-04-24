@@ -80,7 +80,7 @@ public class Main {
                 //get nexzt phrase
                 if(s.charAt(globalInt-1)==')') {
 
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), startState, stateInt + 1);
+                    fsm = new state(FiniteStateMachine.size(), '|', startState, stateInt + 1);
                     newState = FiniteStateMachine.get(startState - 1);
                     if (FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt) == FiniteStateMachine.get(dummyStartInt).nextPhrase2Index(stateInt))
                     {
@@ -110,7 +110,7 @@ public class Main {
                 if(s.charAt(globalInt-1)==')') {
                     //start at either the where the brackets start or exit
                     //so make startState get changed
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState, nextPhrase1);
+                    fsm = new state(FiniteStateMachine.size(),'|',startState, nextPhrase1);
                     newState = FiniteStateMachine.get(startState);
                     if (FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt) == FiniteStateMachine.get(dummyStartInt).nextPhrase2Index(stateInt))
                     {
@@ -137,7 +137,7 @@ public class Main {
                 //get next phrase
                 nextPhrase1 = stateInt + 1;
                 if(s.charAt(globalInt-1)==')') {
-                    fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt),startState, nextPhrase1);
+                    fsm = new state(FiniteStateMachine.size(), '|',startState, nextPhrase1);
                     newState = FiniteStateMachine.get(startState-1);
                     FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt);
                 }
@@ -206,15 +206,16 @@ public class Main {
                 //add the state here
                 fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), stateInt + 1, stateInt + 1);
                 FiniteStateMachine.add(fsm);
-                stateInt++;
-                globalInt++;
+
                 if(s.charAt(globalInt-1)=='\\')
                 {
-                    state escapeState = new state(FiniteStateMachine.size(), s.charAt(globalInt), stateInt + 1, stateInt + 1);
+                    state escapeState = new state(stateInt, s.charAt(globalInt), stateInt + 1, stateInt + 1);
                     FiniteStateMachine.add(escapeState);
                     stateInt++;
                     globalInt++;
                 }
+                stateInt++;
+                globalInt++;
             }
             else {
                 if (s.charAt(globalInt) == '(') {
