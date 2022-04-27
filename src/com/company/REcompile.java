@@ -127,7 +127,7 @@ public class REcompile {
             //if globalint + 1 is greater than size
             if (s.charAt(globalInt) == '*') {
                 fsm = new state(stateInt, '|', stateInt + 1, stateInt - 1);
-                state previousState = FiniteStateMachine.get(FiniteStateMachine.size() - 3);
+                state previousState = FiniteStateMachine.get(FiniteStateMachine.size() - 2);
                 if (fsm.stateIndex()-1== dummyEndInt) {
                     fsm.nextPhrase2Index(dummyStartInt+1);
                     previousState = FiniteStateMachine.get(dummyStartInt);
