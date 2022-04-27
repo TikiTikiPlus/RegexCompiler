@@ -79,7 +79,7 @@ public class REcompile {
             //gets the previous state. basically the state index -1 for the most part
             state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-1);
             //set a default orState
-            state orState = new state(stateInt, '|', startState+1, stateInt + 1);
+            state orState = new state(stateInt, '|', startState, stateInt + 1);
             System.out.print(orState.stateIndex() + ", ");
             FiniteStateMachine.add(orState);
             stateInt++;
@@ -88,7 +88,7 @@ public class REcompile {
             globalInt++;
             startState = orState.stateIndex();
             state currState = expression(s);
-            orState.nextPhrase2Index(currState.stateIndex());
+            //orState.nextPhrase2Index(fsm.stateIndex());
             if(isVocab(currState._symbol(), s)&&currState._symbol()!='\\')
             {
                 orState.nextPhrase2Index(stateInt+1);
@@ -97,8 +97,6 @@ public class REcompile {
             //take note of the final state of previous state
             //what if theres end of disjunction?
             //build a branching machine
-            //build a branching machine
-            //build a branching machine
             //then get the final state of previous state
             FiniteStateMachine.add(newState);
             if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
@@ -106,7 +104,7 @@ public class REcompile {
             }
             previousState.nextPhrase2Index(newState.stateIndex());
             stateInt++;
-            return orState;
+            return fsm;
         }
         fsm = term(s);
         if (globalInt < s.length()) {
@@ -116,7 +114,6 @@ public class REcompile {
         }
         return fsm;
     }
-
     public static state term(String s) throws Exception {
         fsm = factor(s);
         //newState = expression(s);
@@ -216,7 +213,7 @@ public class REcompile {
                     state dummyStart = FiniteStateMachine.get(stateInt - 1);
                     dummyStartInt = dummyStart.stateIndex();
                     int oldStartState = startState;
-                    startState = dummyStartInt+1;
+                    startState = dummyStartInt;
                     fsm = expression(s);
                     if (s.charAt(globalInt) == ')') {
                         globalInt++;
