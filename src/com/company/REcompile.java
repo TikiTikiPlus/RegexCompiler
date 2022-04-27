@@ -131,9 +131,6 @@ public class REcompile {
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
                 if (stateInt-1== dummyEndInt) {
                     previousState = FiniteStateMachine.get(dummyStartInt);
-                    previousState = FiniteStateMachine.get(dummyStartInt);
-//                    previousState.nextPhrase2Index(stateInt);
-//                    previousState.nextPhraseIndex(stateInt);
                 }
                 FiniteStateMachine.add(stateAsteriskState);
                 if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
