@@ -148,35 +148,38 @@ public class REcompile {
                 globalInt++;
                 fsm = stateAsteriskState;
             } else if (s.charAt(globalInt) == '+') {
-                //get next phrase
-                nextPhrase1 = stateInt + 1;
-                if (s.charAt(globalInt - 1) == ')') {
-                    //start at either the where the brackets start or exit
-                    //so make startState get changed
-                    fsm = new state(FiniteStateMachine.size(), '|', startState, nextPhrase1);
-                } else {
-                    fsm = new state(FiniteStateMachine.size(), '|', nextPhrase1, stateInt - 1);
-                }
-                FiniteStateMachine.add(fsm);
-                //updates the state + is pointing to
+                state plusState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
+                FiniteStateMachine.add(plusState);
+                stateInt++;
+                //take note of the final state of previous state
+                //what if theres end of disjunction?
+                //build a branching machine
+                //then get the final state of previous state
+                FiniteStateMachine.add(newState);
                 stateInt++;
                 globalInt++;
+                fsm = plusState;
             } else if (s.charAt(globalInt) == '?') {
-                //get next phrase
-                nextPhrase1 = stateInt + 1;
-                if (s.charAt(globalInt - 1) == ')') {
-                    fsm = new state(FiniteStateMachine.size(), '|', startState, nextPhrase1);
-                    newState = FiniteStateMachine.get(startState - 1);
-                    //FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt);
-                } else {
-                    fsm = new state(FiniteStateMachine.size(), '|', nextPhrase1, stateInt - 1);
-                    newState = FiniteStateMachine.get(stateInt - 2);
+                state stateAsteriskState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
+                state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
+                if (stateInt-1== dummyEndInt) {
+                    previousState = FiniteStateMachine.get(dummyStartInt);
                 }
-                newState.nextPhraseIndex(stateInt);
-                FiniteStateMachine.add(fsm);
-                //updates the state * is pointing to
+                FiniteStateMachine.add(stateAsteriskState);
+                if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
+                    previousState.nextPhraseIndex(stateInt);
+                }
+                previousState.nextPhrase2Index(stateInt);
+                stateInt++;
+                state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
+                //take note of the final state of previous state
+                //what if theres end of disjunction?
+                //build a branching machine
+                //then get the final state of previous state
+                FiniteStateMachine.add(newState);
                 stateInt++;
                 globalInt++;
+                fsm = stateAsteriskState;
             }
             //checks if the character is an or sign
             //also checks if the or sign is adjacent to each other
@@ -215,22 +218,16 @@ public class REcompile {
                     if (s.charAt(globalInt) == ')') {
                         globalInt++;
                         dummyEndInt = FiniteStateMachine.size()-1;
-                        //fsm.nextPhrase2Index(startState);
-                        //this is to basically check where the or states should end
-//                        if (bracketList.size()>0&& bracketListCount<bracketList.size()) {
-//                            startState = bracketList.get(bracketList.size()-1);
-//                            bracketList.remove(bracketList.size()-1);
-//                        }
-                        //stop or then bracket interactions
-                        //
-
                         //checks if the startState is in the bracket or not.
                         //if its inside this bracket, do nothing since
                         //the or state still wants this
                         //otherwise, throw it out
                         startState = oldStartState;
-                        dummyStart.nextPhraseIndex(fsm.stateIndex());
-                        dummyStart.nextPhrase2Index(fsm.stateIndex());
+                        //prevents start state from looping upon itself
+                        if(dummyStartInt != fsm.stateIndex()) {
+                            dummyStart.nextPhraseIndex(fsm.stateIndex());
+                            dummyStart.nextPhrase2Index(fsm.stateIndex());
+                        }
                         if(startState>dummyStartInt+1 && dummyEndInt > startState)
                         {
 
@@ -264,7 +261,9 @@ public class REcompile {
             }
             FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
             if (valid) {
-                FiniteStateMachine.get(0).nextPhraseIndex(fsm.stateIndex());
+                FiniteStateMachine.get(0).nextPhraseIndex(startState);
+                FiniteStateMachine.get(0).nextPhrase2Index(startState);
+
                 for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
                     System.out.println(FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
                 }
