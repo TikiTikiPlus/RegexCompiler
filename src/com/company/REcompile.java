@@ -79,7 +79,7 @@ public class REcompile {
             //gets the previous state. basically the state index -1 for the most part
             state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-1);
             //set a default orState
-            state orState = new state(stateInt, '|', startState, stateInt + 1);
+            state orState = new state(stateInt, '|', fsm.stateIndex(), stateInt + 1);
             System.out.print(orState.stateIndex() + ", ");
             FiniteStateMachine.add(orState);
             stateInt++;
@@ -126,20 +126,18 @@ public class REcompile {
             //if you have a double star or double question mark, return error
             //if globalint + 1 is greater than size
             if (s.charAt(globalInt) == '*') {
-                fsm = new state(stateInt, '|', stateInt + 1, stateInt - 1);
-                state previousState = FiniteStateMachine.get(FiniteStateMachine.size() - 2);
-                if (fsm.stateIndex()-1== dummyEndInt) {
-                    fsm.nextPhrase2Index(dummyStartInt+1);
+                state stateAsteriskState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
+                state previousState =fsm;
+                if (stateInt-1== dummyEndInt) {
                     previousState = FiniteStateMachine.get(dummyStartInt);
-                    fsm.nextPhrase2Index(startState);
-                }
-                FiniteStateMachine.add(fsm);
-                System.out.println(startState);
-
-                if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
+                    previousState.nextPhrase2Index(stateInt);
                     previousState.nextPhraseIndex(stateInt);
                 }
-                previousState.nextPhrase2Index(stateInt);
+                FiniteStateMachine.add(stateAsteriskState);
+//                if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
+//                    previousState.nextPhraseIndex(stateInt);
+//                }
+//                previousState.nextPhrase2Index(stateInt);
                 stateInt++;
                 state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
                 //take note of the final state of previous state
@@ -149,6 +147,7 @@ public class REcompile {
                 FiniteStateMachine.add(newState);
                 stateInt++;
                 globalInt++;
+                fsm = stateAsteriskState;
             } else if (s.charAt(globalInt) == '+') {
                 //get next phrase
                 nextPhrase1 = stateInt + 1;
@@ -229,8 +228,11 @@ public class REcompile {
                         //
                         dummyStart.nextPhraseIndex(startState);
                         dummyStart.nextPhrase2Index(startState);
-
-                        if(startState>dummyStartInt && dummyEndInt > startState)
+                        //checks if the startState is in the bracket or not.
+                        //if its inside this bracket, do nothing since
+                        //the or state still wants this
+                        //otherwise, throw it out
+                        if(startState>dummyStartInt+1 && dummyEndInt > startState)
                         {
 
                         }
@@ -238,7 +240,7 @@ public class REcompile {
                         {
                             startState = oldStartState;
                         }
-                        return FiniteStateMachine.get(oldStartState);
+                        return FiniteStateMachine.get(startState);
                     } else {
                         error();
                     }
@@ -249,7 +251,6 @@ public class REcompile {
         //term(s);
         return fsm;
     }
-
     public static void parse(String s) throws Exception {
         try {
             fsm = new state(stateInt, '|', 1, 1);
@@ -264,7 +265,6 @@ public class REcompile {
             }
             FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
             if (valid) {
-                FiniteStateMachine.get(fsm.stateIndex());
                 for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
                     System.out.println(FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
                 }
@@ -298,19 +298,5 @@ public class REcompile {
     public static void error() {
         System.err.print("Invalid expression");
         valid = false;
-    }
-
-    public static int getEndStatement(state EndState) throws Exception {
-
-        if (EndState.nextPhrase2Index() < FiniteStateMachine.size()) {
-            state endState;
-            if (EndState.nextPhrase2Index() > EndState.nextPhraseIndex()) {
-                endState = FiniteStateMachine.get(EndState.nextPhrase2Index());
-            } else {
-                endState = FiniteStateMachine.get(EndState.nextPhraseIndex());
-            }
-            return getEndStatement(endState);
-        }
-        return EndState.nextPhrase2Index();
     }
 }
