@@ -47,7 +47,7 @@ public class REcompile {
 
     public static state expression(String s) throws Exception {
         if (s.charAt(globalInt) == ')') {
-            return fsm;
+            return FiniteStateMachine.get(startState);
         }
         if (s.charAt(globalInt) == '[') {
             int squareMarker = globalInt;
@@ -79,7 +79,7 @@ public class REcompile {
             //gets the previous state. basically the state index -1 for the most part
             state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-1);
             //set a default orState
-            state orState = new state(stateInt, '|', startState, stateInt + 1);
+            state orState = new state(stateInt, '|', startState+1, stateInt + 1);
             System.out.print(orState.stateIndex() + ", ");
             FiniteStateMachine.add(orState);
             stateInt++;
@@ -229,13 +229,14 @@ public class REcompile {
 //                        }
                         //stop or then bracket interactions
                         //
-                        dummyStart.nextPhraseIndex(fsm.stateIndex());
-                        dummyStart.nextPhrase2Index(fsm.stateIndex());
+
                         //checks if the startState is in the bracket or not.
                         //if its inside this bracket, do nothing since
                         //the or state still wants this
                         //otherwise, throw it out
                         startState = oldStartState;
+                        dummyStart.nextPhraseIndex(fsm.stateIndex());
+                        dummyStart.nextPhrase2Index(fsm.stateIndex());
                         if(startState>dummyStartInt+1 && dummyEndInt > startState)
                         {
 
