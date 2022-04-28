@@ -215,6 +215,7 @@ public class REcompile {
                         FiniteStateMachine.add(escapeState);
                         stateInt++;
                         globalInt++;
+                        fsm = escapeState;
                     }
                 }
             } else {
