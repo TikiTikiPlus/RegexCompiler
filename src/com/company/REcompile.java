@@ -146,24 +146,38 @@ public class REcompile {
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
                 if (stateInt-1== dummyEndInt){
                     previousState = FiniteStateMachine.get(dummyStartInt);
-                    if(dummyStartInt +1 != stateAsteriskState.stateIndex())
+                    if(stateAsteriskState.stateIndex() == FiniteStateMachine.get(stateAsteriskState.nextPhrase2Index()).nextPhrase2Index())
                     {
-                        stateAsteriskState.nextPhrase2Index(startState+1);
+                        stateAsteriskState.nextPhrase2Index(stateAsteriskState.nextPhrase2Index()+1);
                     }
                 }
                 FiniteStateMachine.add(stateAsteriskState);
                 if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
                     previousState.nextPhraseIndex(stateInt);
+                    previousState.nextPhrase2Index(stateInt);
                 }
-                if(dummyStartInt==startState+1)
+                if(stateAsteriskState.stateIndex() == FiniteStateMachine.get(stateAsteriskState.nextPhrase2Index()).nextPhrase2Index())
                 {
-                    stateAsteriskState.nextPhrase2Index(startState+2);
+                    stateAsteriskState.nextPhrase2Index(stateAsteriskState.nextPhrase2Index()+1);
                 }
-                if(dummyStartInt == stateAsteriskState.stateIndex())
+                if(stateAsteriskState.nextPhrase2Index()==stateAsteriskState.stateIndex())
                 {
-                    stateAsteriskState.nextPhraseIndex(startState+1);
+                    stateAsteriskState.nextPhrase2Index(previousState.stateIndex()+1);
                 }
+//                if(dummyStartInt +1 != stateAsteriskState.stateIndex())
+//                {
+//                    stateAsteriskState.nextPhrase2Index(startState+1);
+//                }
+////                if(dummyStartInt==startState+1)
+////                {
+////                    stateAsteriskState.nextPhrase2Index(startState+2);
+////                }
+//                if(dummyStartInt == stateAsteriskState.stateIndex())
+//                {
+//                    stateAsteriskState.nextPhraseIndex(startState+1);
+//                }
                 previousState.nextPhrase2Index(stateInt);
+
                 stateInt++;
                 state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
                 //take note of the final state of previous state
