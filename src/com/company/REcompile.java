@@ -41,6 +41,8 @@ public class REcompile {
                 input += args[argsIndex];
             }
         }
+        input = input.substring(0, 0) + '(' + input.substring(0);
+        input = input.substring(0, input.length())+ ')'+input.substring(input.length());
         parse(input);
     }
     //find an expression
