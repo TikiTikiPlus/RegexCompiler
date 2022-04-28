@@ -83,7 +83,7 @@ public class REcompile {
             //set a default orState
             state orState = new state(stateInt, '|', startState, stateInt + 1);
             System.out.print(orState.stateIndex() + ", ");
-            if(dummyStartInt<=startState)
+            if(dummyStartInt==startState)
             {
                 orState.nextPhraseIndex(startState+1);
             }
