@@ -163,7 +163,6 @@ public class REcompile {
             } else if (s.charAt(globalInt) == '+') {
                 state plusState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
                 FiniteStateMachine.add(plusState);
-                stateInt++;
                 //take note of the final state of previous state
                 //what if theres end of disjunction?
                 //build a branching machine
@@ -244,6 +243,7 @@ public class REcompile {
                         }
                         if(startState>dummyStartInt+1 && dummyEndInt > startState)
                         {
+
                         }
                         else
                         {
