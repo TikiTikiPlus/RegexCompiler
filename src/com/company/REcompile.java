@@ -54,6 +54,7 @@ public class REcompile {
             int squareMarker = globalInt;
             input = input.substring(0, squareMarker) + '(' + input.substring(squareMarker + 1);
             s = s.substring(0, squareMarker) + '(' + s.substring(squareMarker + 1);
+            s = s.substring(0, squareMarker) + '(' + s.substring(squareMarker + 1);
             while (squareMarker < s.length()) {
 
                 squareMarker++;
@@ -81,9 +82,17 @@ public class REcompile {
             //gets the previous state. basically the state index -1 for the most part
             state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-1);
             //set a default orState
+
             state orState = new state(stateInt, '|', startState, stateInt + 1);
-            System.out.print(orState.stateIndex() + ", ");
-            if(dummyStartInt==startState)
+            if(startState +1 != orState.stateIndex())
+            {
+                orState.nextPhraseIndex(startState+1);
+            }
+            if(dummyStartInt==startState+1)
+            {
+                orState.nextPhraseIndex(startState);
+            }
+            if(dummyStartInt == orState.stateIndex())
             {
                 orState.nextPhraseIndex(startState+1);
             }
@@ -94,8 +103,6 @@ public class REcompile {
             globalInt++;
             startState = orState.stateIndex();
             state currState = expression(s);
-            //orState.nextPhrase2Index(fsm.stateIndex());
-            //orState.nextPhrase2Index(stateInt+1);
             state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
             //take note of the final state of previous state
             //what if theres end of disjunction?
