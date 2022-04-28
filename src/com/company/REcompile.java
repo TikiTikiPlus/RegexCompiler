@@ -79,6 +79,10 @@ public class REcompile {
             s = s.substring(0, squareMarker) + ')' + s.substring(squareMarker + 1);
         }
         if (s.charAt(globalInt) == '|') {
+            String orIllegalNext = illegalNext += '|';
+            if (orIllegalNext.contains(String.valueOf(s.charAt(globalInt+1))) && s.charAt(globalInt-1) != '\\') {
+                error();
+            }
             //gets the previous state. basically the state index -1 for the most part
             state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-1);
             //set a default orState
@@ -164,18 +168,6 @@ public class REcompile {
                 {
                     stateAsteriskState.nextPhrase2Index(previousState.stateIndex()+1);
                 }
-//                if(dummyStartInt +1 != stateAsteriskState.stateIndex())
-//                {
-//                    stateAsteriskState.nextPhrase2Index(startState+1);
-//                }
-////                if(dummyStartInt==startState+1)
-////                {
-////                    stateAsteriskState.nextPhrase2Index(startState+2);
-////                }
-//                if(dummyStartInt == stateAsteriskState.stateIndex())
-//                {
-//                    stateAsteriskState.nextPhraseIndex(startState+1);
-//                }
                 previousState.nextPhrase2Index(stateInt);
 
                 stateInt++;
