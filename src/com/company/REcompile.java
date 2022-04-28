@@ -163,7 +163,6 @@ public class REcompile {
                 //what if theres end of disjunction?
                 //build a branching machine
                 //then get the final state of previous state
-                FiniteStateMachine.add(newState);
                 stateInt++;
                 globalInt++;
                 fsm = plusState;
@@ -281,6 +280,7 @@ public class REcompile {
             }
         } catch (Exception e) {
             System.err.println(e);
+            error();
         }
     }
 
@@ -306,7 +306,6 @@ public class REcompile {
     }
 
     public static void error() {
-        System.err.print("Invalid expression");
         valid = false;
     }
 }
