@@ -160,6 +160,7 @@ public class Main {
                 //gets the previous state. basically the state index -1 for the most part
                 state previousState = FiniteStateMachine.get(stateInt - 1);
                 //set a default orState
+                System.out.println(startState);
                 state orState = new state(stateInt, '|', startState, stateInt + 1);
                 System.out.print(orState.stateIndex() + ", ");
                 FiniteStateMachine.add(orState);
