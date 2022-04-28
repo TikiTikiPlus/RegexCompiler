@@ -151,6 +151,18 @@ public class REcompile {
                 if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
                     previousState.nextPhraseIndex(stateInt);
                 }
+                if(startState +1 != stateAsteriskState.stateIndex())
+                {
+                    stateAsteriskState.nextPhrase2Index(startState+1);
+                }
+                if(dummyStartInt==startState+1)
+                {
+                    stateAsteriskState.nextPhrase2Index(startState+2);
+                }
+                if(dummyStartInt == stateAsteriskState.stateIndex())
+                {
+                    stateAsteriskState.nextPhraseIndex(startState+1);
+                }
                 previousState.nextPhrase2Index(stateInt);
                 stateInt++;
                 state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
