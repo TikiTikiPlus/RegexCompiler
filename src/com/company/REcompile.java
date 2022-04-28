@@ -296,10 +296,13 @@ public class REcompile {
             FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
             if (valid) {
                 //if my special characters didn't do anything to alter the start state, don't do anything to it
+                FiniteStateMachine.get(0).nextPhraseIndex(startState);
+                FiniteStateMachine.get(0).nextPhrase2Index(startState);
                 if(FiniteStateMachine.get(FiniteStateMachine.get(0).nextPhrase2Index())._symbol()!='|'||FiniteStateMachine.get(FiniteStateMachine.get(0).nextPhrase2Index())._symbol()!='|') {
-                    FiniteStateMachine.get(0).nextPhraseIndex(startState);
-                    FiniteStateMachine.get(0).nextPhrase2Index(startState);
+                    FiniteStateMachine.get(0).nextPhraseIndex(fsm.stateIndex());
+                    FiniteStateMachine.get(0).nextPhrase2Index(fsm.stateIndex());
                 }
+
                 for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
                     System.out.println(FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
                 }
