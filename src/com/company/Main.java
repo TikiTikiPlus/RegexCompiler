@@ -21,7 +21,6 @@ public class Main {
     static int nextPhrase2;
     public static int startState=1;
     static state newState;
-    static int endStateExpression=0;
     static int dummyStartInt=0;
     static int dummyEndInt=0;
     public static void main(String[] args)  throws Exception{
@@ -49,7 +48,7 @@ public class Main {
         if (s.charAt(globalInt) == ')') {
             //returns the start of the state of brackets
             //this is also used to check where the or statement is
-            return fsm;
+            return FiniteStateMachine.get(startState);
         }
         if(s.charAt(globalInt)=='[')
         {
@@ -81,10 +80,9 @@ public class Main {
             s = s.substring(0, squareMarker) + ')' + s.substring(squareMarker + 1);
         }
         fsm = term(s);
+        globalInt++;
         if (globalInt < s.length()) {
-            if (s.charAt(globalInt) != '\0' && valid) {
-                fsm = expression(s);
-            }
+            fsm = expression(s);
         }
         return fsm;
     }
@@ -96,152 +94,111 @@ public class Main {
         //get previous index and the next one
         //update the pointer of previous one
         //forward the pointer by one
-        if (globalInt < s.length()) {
-            //this would return an error if statement looks like this
-            //REGEX: (a*) or (a?)
-            //if you have a double star or double question mark, return error
-            //if globalint + 1 is greater than size
-            if(s.charAt(globalInt)=='*')
-            {
-                fsm = new state(stateInt, '|', stateInt+1, stateInt-1);
+        //this would return an error if statement looks like this
+        //REGEX: (a*) or (a?)
+        //if you have a double star or double question mark, return error
+        //if globalint + 1 is greater than size
+        if(globalInt<s.length()) {
+            if (s.charAt(globalInt) == '*') {
+                fsm = new state(stateInt, '|', stateInt + 1, stateInt - 1);
+                if (fsm.stateIndex() == dummyEndInt) {
+                    fsm.nextPhrase2Index(startState);
+                    state changeState = FiniteStateMachine.get(startState - 1);
+                    if (changeState.nextPhraseIndex() == changeState.nextPhrase2Index()) {
+                        changeState.nextPhraseIndex(fsm.stateIndex());
+                    }
+                    changeState.nextPhrase2Index(fsm.stateIndex());
+                }
                 FiniteStateMachine.add(fsm);
-                state changeState = FiniteStateMachine.get(fsm.nextPhrase2Index()-1);
-                if(fsm.stateIndex()-1 == dummyEndInt) {
-                    if(bracketList.size()>0)
-                    {
-                        fsm.nextPhrase2Index(startState);
-                        bracketList.remove(bracketList.size()-1);
-                    }
-                    for (state x : FiniteStateMachine) {
-                        if (x.nextPhrase2Index() == fsm.stateIndex()) {
-                            if (x.nextPhraseIndex() == x.nextPhrase2Index()) {
-                                x.nextPhrase2Index(fsm.stateIndex());
-                                x.nextPhraseIndex(fsm.stateIndex());
-                            }
-                        }
-                        //this is for or statements
-                        if (x.stateIndex() == dummyStartInt - 1 && startState != x.stateIndex()) {
-                            x.nextPhrase2Index(fsm.stateIndex());
-                        }
-                        if (x.stateIndex() == dummyStartInt - 1 && startState != x.stateIndex()) {
-                            x.nextPhraseIndex(fsm.stateIndex());
-                        }
-                    }
+                System.out.println(startState);
+                state previousState = FiniteStateMachine.get(FiniteStateMachine.size() - 3);
+                if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
+                    previousState.nextPhraseIndex(stateInt);
                 }
-                for(state x: FiniteStateMachine) {
-                    if(x.nextPhraseIndex()==fsm.nextPhrase2Index()) {
-                        if (x.nextPhraseIndex() == x.nextPhrase2Index()) {
-                            x.nextPhraseIndex(stateInt);
-                        }
-                        x.nextPhrase2Index(stateInt);
-                    }
-                }
-                globalInt++;
+                previousState.nextPhrase2Index(stateInt);
                 stateInt++;
-            }
-            else if (s.charAt(globalInt) == '+') {
+                state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
+                //take note of the final state of previous state
+                //what if theres end of disjunction?
+                //build a branching machine
+                //then get the final state of previous state
+                FiniteStateMachine.add(newState);
+                stateInt++;
+            } else if (s.charAt(globalInt) == '+') {
                 //get next phrase
-                if(s.charAt(globalInt-1)==')') {
-                    fsm = new state(FiniteStateMachine.size(), '|', stateInt+1, startState);
-                }
-                else
-                {
-                    fsm = new state(FiniteStateMachine.size(),'|', stateInt+1, stateInt-1);
+                if (s.charAt(globalInt - 1) == ')') {
+                    fsm = new state(FiniteStateMachine.size(), '|', stateInt + 1, startState);
+                } else {
+                    fsm = new state(FiniteStateMachine.size(), '|', stateInt + 1, stateInt - 1);
                     newState = FiniteStateMachine.get(stateInt - 2);
-                    System.out.println(dummyEndInt+1);
+                    System.out.println(dummyEndInt + 1);
                 }
                 FiniteStateMachine.add(fsm);
                 //updates the state * is pointing to
                 //if the next phrases point to the same one, we know they are literals
                 stateInt++;
-                globalInt++;
-            }
-            else if (s.charAt(globalInt) == '?') {
+            } else if (s.charAt(globalInt) == '?') {
                 //get next phrase
                 //get the start state of previous state
                 nextPhrase1 = stateInt + 1;
-                fsm = new state(FiniteStateMachine.size(), '|',stateInt+1, stateInt+1);
-                if(s.charAt(globalInt-1)==')') {
-                    newState = FiniteStateMachine.get(startState-1);
+                fsm = new state(FiniteStateMachine.size(), '|', stateInt + 1, stateInt + 1);
+                if (s.charAt(globalInt - 1) == ')') {
+                    newState = FiniteStateMachine.get(startState - 1);
                     //FiniteStateMachine.get(dummyStartInt).nextPhraseIndex(stateInt);
-                }
-                else
-                {
-                    fsm = new state(FiniteStateMachine.size(), '|', nextPhrase1, stateInt-1);
+                } else {
+                    fsm = new state(FiniteStateMachine.size(), '|', nextPhrase1, stateInt - 1);
                     newState = FiniteStateMachine.get(stateInt - 2);
                 }
                 newState.nextPhraseIndex(stateInt);
                 FiniteStateMachine.add(fsm);
                 //updates the state * is pointing to
                 stateInt++;
-                globalInt++;
             }
             //checks if the character is an or sign
             //also checks if the or sign is adjacent to each other
             else if (s.charAt(globalInt) == '|') {
-                //since start state is set to 1 by default, the start state will always change to this
-                //you always point to the next state forward for phrase 2. If there is a special character
-                //that needs to point somewhere else, that special character will be the one that is in charge
-                //of it.
-                state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-1);
-                state orState = new state(stateInt,'|',startState,stateInt+1);
-                if(dummyStartInt>dummyEndInt)
-                {
-                    orState.nextPhraseIndex(dummyStartInt);
-                }
-//                if(bracketList.size()>0 && startState!=stateInt)
-//                {
-//                    if(startState > dummyStartInt) {
-//                        orState.nextPhraseIndex(startState);
-//                    }
-//                    else
-//                    {
-//                        orState.nextPhraseIndex(dummyStartInt+1);
-//                    }
-//                }
+                //gets the previous state. basically the state index -1 for the most part
+                state previousState = FiniteStateMachine.get(stateInt - 1);
+                //set a default orState
+                state orState = new state(stateInt, '|', startState, stateInt + 1);
+                System.out.print(orState.stateIndex() + ", ");
                 FiniteStateMachine.add(orState);
-                bracketList.add(orState.stateIndex());
-                startState=stateInt;
-                globalInt++;
+//                startState = orState.stateIndex();
                 stateInt++;
-                expression(s);
-                state newState = new state(stateInt,'|',stateInt+1,stateInt+1);
-                if(dummyStartInt==orState.stateIndex()+1)
-                {
-                    orState.nextPhrase2Index(startState);
-
+                //if there is an or state before, point to there
+                if (bracketList.size() > 0) {
+                    startState = bracketList.get(bracketList.size() - 1);
                 }
-                //if the thing is in brackets
-//                if(startState != orState.stateIndex()) {
-//                    orState.nextPhrase2Index(startState);
-//                }
+                bracketList.add(orState.stateIndex());
+                globalInt++;
+                state currState = expression(s);
+                state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
                 //take note of the final state of previous state
                 //what if theres end of disjunction?
                 //build a branching machine
                 //then get the final state of previous state
                 stateInt++;
-                if(previousState.nextPhraseIndex()==previousState.nextPhrase2Index()) {
-                    previousState.nextPhraseIndex(newState.stateIndex());
+                if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
+                    previousState.nextPhrase2Index(newState.stateIndex());
                 }
-                previousState.nextPhrase2Index(newState.stateIndex());
+                previousState.nextPhraseIndex(newState.stateIndex());
                 FiniteStateMachine.add(newState);
-                return fsm = orState;
-
+                fsm = currState;
             }
         }
         return fsm;
     }
     public static state factor(String s) throws Exception {
-        if (globalInt < s.length()) {
-            //checks if the character doesnt have special meanings
+        //checks if the character doesnt have special meanings
+        if(globalInt<s.length()) {
             if (isVocab(s.charAt(globalInt), s)) {
                 //add the state here
                 fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), stateInt + 1, stateInt + 1);
                 FiniteStateMachine.add(fsm);
                 globalInt++;
                 stateInt++;
-                if(globalInt<s.length()) {
-                    if (s.charAt(globalInt-1) == '\\') {
+                if (globalInt < s.length()) {
+                    if (s.charAt(globalInt) == '\\') {
                         state escapeState = new state(stateInt, s.charAt(globalInt), stateInt + 1, stateInt + 1);
                         FiniteStateMachine.add(escapeState);
                         stateInt++;
@@ -249,64 +206,47 @@ public class Main {
                     }
                 }
 
-            }
-            else {
-                if (s.charAt(globalInt) == '(') {
+            } else if (s.charAt(globalInt) == '(') {
+                globalInt++;
+                int localStart = stateInt;
+                state dummyStart = FiniteStateMachine.get(stateInt);
+                dummyStartInt = dummyStart.stateIndex();
+                startState = dummyStartInt;
+                int bracketListCount = bracketList.size();
+                int oldStartState = dummyStart.stateIndex();
+                fsm = expression(s);
+                if (s.charAt(globalInt) == ')') {
                     globalInt++;
-                    if(FiniteStateMachine.size()>1&& bracketList.size()>0) {
-                        startState = bracketList.get(bracketList.size() - 1);
-                    }
-                    state dummyStart = FiniteStateMachine.get(stateInt-1);
-                    dummyStartInt = dummyStart.stateIndex()+1;
-                    int bracketListCount = bracketList.size();
-                    fsm = expression(s);
-                    if (s.charAt(globalInt) == ')') {
-                        globalInt++;
-                        if (bracketListCount<bracketList.size())
-                        {
+                    dummyStartInt = dummyStart.stateIndex();
+                    startState = localStart;
+                    state dummyEnd = FiniteStateMachine.get(FiniteStateMachine.size() - 1);
+                    dummyEndInt = dummyEnd.stateIndex() + 1;
+                    fsm.nextPhrase2Index(startState);
+                    //this is to basically check where the or states should end
+                        if (bracketList.size()>0&& bracketListCount<bracketList.size()) {
+                            startState = bracketList.get(bracketList.size()-1);
                             bracketList.remove(bracketList.size()-1);
                         }
-//                        if(FiniteStateMachine.size()>1&&bracketList.size()>0) {
-//                            bracketList.remove(bracketList.size()-1);
-//                        }
-                        dummyStartInt = dummyStart.stateIndex()+1;
-                        state dummyEnd = FiniteStateMachine.get(FiniteStateMachine.size()-1);
-                        dummyEndInt = dummyEnd.stateIndex();
-                        //for each states that point to the dummy start state,
-                        //change that start states of these states
-                        for(state x: FiniteStateMachine)
-                        {
-                            if(x.nextPhrase2Index()==dummyStartInt && x.nextPhraseIndex()==dummyStartInt)
-                            {
-                                if(x.nextPhraseIndex()==x.nextPhrase2Index()&& x.nextPhraseIndex() <= startState)
-                                {
-                                    x.nextPhrase2Index(startState);
-                                    x.nextPhraseIndex(startState);
-                                }
-                            }
+                    state thisState = FiniteStateMachine.get(dummyStart.stateIndex());
+                    System.out.println(dummyStart);
+                    //stop or then bracket interactions
+                    if(startState!= thisState.stateIndex()) {
+                        if (thisState.nextPhraseIndex() == thisState.nextPhrase2Index()) {
+                            thisState.nextPhraseIndex(startState);
                         }
-//                        {
-//                            state x = FiniteStateMachine.get(i);
-//
-//                            //this is for or statements
-//                            else if(x.nextPhrase2Index()==dummyStartInt && x.nextPhrase2Index()>x.nextPhraseIndex()&&startState!=x.stateIndex())
-//                            {
-//                                x.nextPhrase2Index(startState);
-//                            }
-//                            else if(x.nextPhraseIndex()==dummyStartInt&&x.nextPhraseIndex()>x.nextPhrase2Index()&&startState!=x.stateIndex())
-//                            {
-//                                x.nextPhraseIndex(startState);
-//                            }
-//                        }
+                        thisState.nextPhrase2Index(startState);
                     }
-                    else {
-                        error();
+                    if(dummyStartInt<startState) {
+                        startState = oldStartState;
                     }
+                    //for each states that point to the dummy start state,
+                    return FiniteStateMachine.get(oldStartState);
+                } else {
+                    error();
                 }
             }
         }
         //return whatever the fsm is
-        //term(s);
         return fsm;
     }
     public static void parse(String s) throws Exception {
@@ -324,9 +264,8 @@ public class Main {
             FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
             if (valid) {
                 //checks the first occurence of a start state
-                fsm = FiniteStateMachine.get(0);
-                fsm.nextPhraseIndex(startState);
-                fsm.nextPhrase2Index(startState);
+                FiniteStateMachine.get(0).nextPhraseIndex(fsm.stateIndex());
+                FiniteStateMachine.get(0).nextPhrase2Index(fsm.stateIndex());
                 for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
                     System.out.println(FiniteStateMachine.get(fsmIndex).stateIndex() +","+FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
                 }
@@ -344,19 +283,7 @@ public class Main {
         if(globalInt<s.length()) {
             if (nonLiterals.contains(c)) {
                 return false;
-            } else if (globalInt > 0) {
-                if (s.charAt(globalInt-1) == '\\') {
-                    return true;
-                }
             }
-        }
-        else
-        {
-            if(nonLiterals.contains(c))
-            {
-                return false;
-            }
-            return true;
         }
         return true;
     }
@@ -364,25 +291,5 @@ public class Main {
     public static void error() {
         System.err.print("Invalid expression");
         valid = false;
-    }
-    public static int getEndStatement(state EndState) throws Exception
-    {
-
-        if(EndState.nextPhrase2Index()<FiniteStateMachine.size()&& EndState.nextPhraseIndex()< FiniteStateMachine.size()) {
-            state endState;
-            if(EndState.nextPhrase2Index()> EndState.nextPhraseIndex())
-            {
-                endState = FiniteStateMachine.get(EndState.nextPhrase2Index());
-            }
-            else {
-                endState = FiniteStateMachine.get(EndState.nextPhraseIndex());
-            }
-            return getEndStatement(endState);
-        }
-        if(EndState.nextPhraseIndex()> EndState.nextPhrase2Index())
-        {
-            return EndState.nextPhraseIndex();
-        }
-        return EndState.nextPhrase2Index();
     }
 }
