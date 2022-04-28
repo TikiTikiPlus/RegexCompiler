@@ -72,6 +72,7 @@ public class REcompile {
                 stringBuffer.insert(squareMarker, '|');
                 input = stringBuffer.toString();
             }
+
             input = input.substring(0, squareMarker) + ')' + input.substring(squareMarker + 1);
             s = s.substring(0, squareMarker) + ')' + s.substring(squareMarker + 1);
         }
@@ -93,7 +94,7 @@ public class REcompile {
             startState = orState.stateIndex();
             state currState = expression(s);
             //orState.nextPhrase2Index(fsm.stateIndex());
-            orState.nextPhrase2Index(stateInt+1);
+            //orState.nextPhrase2Index(stateInt+1);
             state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
             //take note of the final state of previous state
             //what if theres end of disjunction?
@@ -131,7 +132,7 @@ public class REcompile {
                 state stateAsteriskState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
                 if (stateInt-1== dummyEndInt){
-                    previousState = FiniteStateMachine.get(dummyStartInt+1);
+                    previousState = FiniteStateMachine.get(dummyStartInt);
                 }
                 FiniteStateMachine.add(stateAsteriskState);
                 if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
@@ -161,26 +162,25 @@ public class REcompile {
                 globalInt++;
                 fsm = plusState;
             } else if (s.charAt(globalInt) == '?') {
-                state stateAsteriskState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
+                state oneOrNone = new state(stateInt, '|', stateInt + 1, stateInt+1);
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
                 if (stateInt-1== dummyEndInt) {
                     previousState = FiniteStateMachine.get(dummyStartInt);
                 }
-                FiniteStateMachine.add(stateAsteriskState);
-                if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
+                FiniteStateMachine.add(oneOrNone);
+                if (previousState.nextPhraseIndex() > previousState.nextPhrase2Index()) {
                     previousState.nextPhraseIndex(stateInt);
                 }
-                previousState.nextPhrase2Index(stateInt);
-                stateInt++;
-                state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
+                else {
+                    previousState.nextPhrase2Index(stateInt);
+                }
                 //take note of the final state of previous state
                 //what if theres end of disjunction?
                 //build a branching machine
                 //then get the final state of previous state
-                FiniteStateMachine.add(newState);
                 stateInt++;
                 globalInt++;
-                fsm = stateAsteriskState;
+                fsm = oneOrNone;
             }
             //checks if the character is an or sign
             //also checks if the or sign is adjacent to each other
@@ -207,11 +207,10 @@ public class REcompile {
             } else {
                 if (s.charAt(globalInt) == '(') {
                     globalInt++;
-                    int localStart = stateInt;
                     state createOpenState = new state(stateInt, '|',stateInt+1,stateInt+1);
                     FiniteStateMachine.add(createOpenState);
                     stateInt++;
-                    state dummyStart = FiniteStateMachine.get(stateInt - 1);
+                    state dummyStart = createOpenState;
                     dummyStartInt = dummyStart.stateIndex();
                     int oldStartState = startState;
                     startState = dummyStartInt;
@@ -264,9 +263,11 @@ public class REcompile {
             }
             FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
             if (valid) {
-                FiniteStateMachine.get(0).nextPhraseIndex(startState);
-                FiniteStateMachine.get(0).nextPhrase2Index(startState);
-
+                //if my special characters didn't do anything to alter the start state, don't do anything to it
+                if(FiniteStateMachine.get(FiniteStateMachine.get(0).nextPhrase2Index())._symbol()!='|'||FiniteStateMachine.get(FiniteStateMachine.get(0).nextPhrase2Index())._symbol()!='|') {
+                    FiniteStateMachine.get(0).nextPhraseIndex(startState);
+                    FiniteStateMachine.get(0).nextPhrase2Index(startState);
+                }
                 for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
                     System.out.println(FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
                 }
