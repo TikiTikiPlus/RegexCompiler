@@ -62,18 +62,15 @@ public class REcompile {
                 // inserted is specified as in arguments
                 stringBuffer.insert(squareMarker, '\\');
                 input = stringBuffer.toString();
-                s = stringBuffer.toString();
                 squareMarker++;
                 squareMarker++;
 
-                if (s.charAt(squareMarker) == ']') {
+                if (input.charAt(squareMarker) == ']') {
                     break;
                 }
-                s = stringBuffer.toString();
                 stringBuffer.insert(squareMarker, '|');
                 input = stringBuffer.toString();
             }
-
             input = input.substring(0, squareMarker) + ')' + input.substring(squareMarker + 1);
             //s = s.substring(0, squareMarker) + ')' + s.substring(squareMarker + 1);
         }
