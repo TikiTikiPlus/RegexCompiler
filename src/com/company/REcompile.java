@@ -48,15 +48,13 @@ public class REcompile {
     //find an expression
     //output a Term first before expression
     public static state expression(String s) throws Exception {
-        if (s.charAt(globalInt) == ')') {
+        if (input.charAt(globalInt) == ')') {
             return FiniteStateMachine.get(startState);
         }
-        if (s.charAt(globalInt) == '[') {
+        if (input.charAt(globalInt) == '[') {
             int squareMarker = globalInt;
             input = input.substring(0, squareMarker) + '(' + input.substring(squareMarker + 1);
-            s = s.substring(0, squareMarker) + '(' + s.substring(squareMarker + 1);
-            s = s.substring(0, squareMarker) + '(' + s.substring(squareMarker + 1);
-            while (squareMarker < s.length()) {
+            while (squareMarker < input.length()) {
 
                 squareMarker++;
                 StringBuffer stringBuffer = new StringBuffer(input);
@@ -77,11 +75,11 @@ public class REcompile {
             }
 
             input = input.substring(0, squareMarker) + ')' + input.substring(squareMarker + 1);
-            s = s.substring(0, squareMarker) + ')' + s.substring(squareMarker + 1);
+            //s = s.substring(0, squareMarker) + ')' + s.substring(squareMarker + 1);
         }
-        if (s.charAt(globalInt) == '|') {
+        if (input.charAt(globalInt) == '|') {
             String orIllegalNext = illegalNext += '|';
-            if (orIllegalNext.contains(String.valueOf(s.charAt(globalInt+1))) && s.charAt(globalInt-1) != '\\') {
+            if (orIllegalNext.contains(String.valueOf(input.charAt(globalInt+1))) && input.charAt(globalInt-1) != '\\') {
                 error();
             }
             //gets the previous state. basically the state index -1 for the most part
@@ -89,6 +87,17 @@ public class REcompile {
             //set a default orState
             state orState = new state(stateInt, '|', startState+1, stateInt + 1);
             FiniteStateMachine.add(orState);
+            int lastState = FiniteStateMachine.get(orState.nextPhraseIndex()-1).nextPhrase2Index();
+            if(lastState== orState.nextPhraseIndex())
+            {
+                if( FiniteStateMachine.get(orState.nextPhraseIndex()-1).nextPhrase2Index() ==  FiniteStateMachine.get(orState.nextPhraseIndex()-1).nextPhraseIndex())
+                {
+
+                }
+                else {
+                    orState.nextPhraseIndex(startState);
+                }
+            }
             stateInt++;
             //if there is an or state before, point to there
             bracketList.add(orState.stateIndex());
@@ -105,14 +114,12 @@ public class REcompile {
                 previousState.nextPhrase2Index(newState.stateIndex());
             }
             previousState.nextPhraseIndex(newState.stateIndex());
-            System.out.println(orState.nextPhraseIndex());
-            if(FiniteStateMachine.get(orState.stateIndex())==FiniteStateMachine.get(FiniteStateMachine.get(orState.nextPhraseIndex()).nextPhraseIndex()));
             stateInt++;
             return fsm;
         }
-        fsm = term(s);
-        if (globalInt < s.length()) {
-            if (s.charAt(globalInt) != '\0' && valid) {
+        fsm = term(input);
+        if (globalInt < input.length()) {
+            if (input.charAt(globalInt) != '\0' && valid) {
                 fsm = expression(s);
             }
         }
@@ -125,17 +132,17 @@ public class REcompile {
         //get previous index and the next one
         //update the pointer of previous one
         //forward the pointer by one
-        if (globalInt < s.length()){
+        if (globalInt < input.length()){
             //this would return an error if statement looks like this
             //REGEX: (a*) or (a?)
             //if you have a double star or double question mark, return error
             //if globalint + 1 is greater than size
             if(globalInt > 2) {
-                if (illegalNext.contains(String.valueOf(s.charAt(globalInt - 1))) && FiniteStateMachine.get(FiniteStateMachine.size()-1)._symbol()=='|') {
+                if (illegalNext.contains(String.valueOf(input.charAt(globalInt - 1))) && FiniteStateMachine.get(FiniteStateMachine.size()-1)._symbol()=='|') {
                     error();
                 }
             }
-            if (s.charAt(globalInt) == '*') {
+            if (input.charAt(globalInt) == '*') {
                 state stateAsteriskState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
                 if (stateInt-1== dummyEndInt){
@@ -160,7 +167,7 @@ public class REcompile {
                 stateInt++;
                 globalInt++;
                 fsm = stateAsteriskState;
-            } else if (s.charAt(globalInt) == '+') {
+            } else if (input.charAt(globalInt) == '+') {
                 state plusState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
                 FiniteStateMachine.add(plusState);
                 //take note of the final state of previous state
@@ -170,7 +177,7 @@ public class REcompile {
                 stateInt++;
                 globalInt++;
                 fsm = plusState;
-            } else if (s.charAt(globalInt) == '?') {
+            } else if (input.charAt(globalInt) == '?') {
                 state oneOrNone = new state(stateInt, '|', stateInt + 1, stateInt+1);
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
                 if (stateInt-1== dummyEndInt) {
@@ -191,24 +198,23 @@ public class REcompile {
                 globalInt++;
                 fsm = oneOrNone;
             }
-
             //checks if the character is an or sign
             //also checks if the or sign is adjacent to each other
         }
         return fsm;
     }
     public static state factor(String s) throws Exception {
-        if (globalInt < s.length()) {
+        if (globalInt < input.length()) {
             //checks if the character doesnt have special meanings
-            if (isVocab(s.charAt(globalInt), s)) {
+            if (isVocab(input.charAt(globalInt), s)) {
                 //add the state here
-                fsm = new state(FiniteStateMachine.size(), s.charAt(globalInt), stateInt + 1, stateInt + 1);
+                fsm = new state(FiniteStateMachine.size(), input.charAt(globalInt), stateInt + 1, stateInt + 1);
                 FiniteStateMachine.add(fsm);
                 globalInt++;
                 stateInt++;
-                if (globalInt < s.length()) {
-                    if (s.charAt(globalInt - 1) == '\\') {
-                        state escapeState = new state(stateInt, s.charAt(globalInt), stateInt + 1, stateInt + 1);
+                if (globalInt < input.length()) {
+                    if (input.charAt(globalInt - 1) == '\\') {
+                        state escapeState = new state(stateInt, input.charAt(globalInt), stateInt + 1, stateInt + 1);
                         FiniteStateMachine.add(escapeState);
                         stateInt++;
                         globalInt++;
@@ -216,7 +222,7 @@ public class REcompile {
                     }
                 }
             } else {
-                if (s.charAt(globalInt) == '(') {
+                if (input.charAt(globalInt) == '(') {
                     globalInt++;
                     state createOpenState = new state(stateInt, '|',stateInt+1,stateInt+1);
                     FiniteStateMachine.add(createOpenState);
@@ -226,7 +232,7 @@ public class REcompile {
                     int oldStartState = startState;
                     startState = dummyStartInt;
                     fsm = expression(s);
-                    if (s.charAt(globalInt) == ')') {
+                    if (input.charAt(globalInt) == ')') {
                         globalInt++;
                         dummyEndInt = FiniteStateMachine.size()-1;
                         //nested bracket fix for *
@@ -263,8 +269,8 @@ public class REcompile {
     public static void parse(String s) throws Exception {
         try {
             fsm = expression(s);
-            if (globalInt < s.length()) {
-                if (s.charAt(globalInt) != '\0') {
+            if (globalInt < input.length()) {
+                if (input.charAt(globalInt) != '\0') {
                     error();
                 }
             }
@@ -283,11 +289,11 @@ public class REcompile {
     public static boolean isVocab(char c, String s) throws Exception {
         //normal check is if there is a special character or not
         //checks if the previous character is escape character. if so, then return true
-        if (globalInt < s.length()) {
+        if (globalInt < input.length()) {
             if (nonLiterals.contains(c)) {
                 return false;
             } else if (globalInt > 0) {
-                if (s.charAt(globalInt - 1) == '\\') {
+                if (input.charAt(globalInt - 1) == '\\') {
                     return true;
                 }
             }
