@@ -47,7 +47,6 @@ public class REcompile {
     }
     //find an expression
     //output a Term first before expression
-
     public static state expression(String s) throws Exception {
         if (s.charAt(globalInt) == ')') {
             return FiniteStateMachine.get(startState);
@@ -88,20 +87,7 @@ public class REcompile {
             //gets the previous state. basically the state index -1 for the most part
             state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-1);
             //set a default orState
-
-            state orState = new state(stateInt, '|', startState, stateInt + 1);
-            if(startState +1 != orState.stateIndex())
-            {
-                orState.nextPhraseIndex(startState+1);
-            }
-            if(dummyStartInt==startState+1)
-            {
-                orState.nextPhraseIndex(startState);
-            }
-            if(dummyStartInt == orState.stateIndex())
-            {
-                orState.nextPhraseIndex(startState+1);
-            }
+            state orState = new state(stateInt, '|', startState+1, stateInt + 1);
             FiniteStateMachine.add(orState);
             stateInt++;
             //if there is an or state before, point to there
@@ -119,6 +105,8 @@ public class REcompile {
                 previousState.nextPhrase2Index(newState.stateIndex());
             }
             previousState.nextPhraseIndex(newState.stateIndex());
+            System.out.println(orState.nextPhraseIndex());
+            if(FiniteStateMachine.get(orState.stateIndex())==FiniteStateMachine.get(FiniteStateMachine.get(orState.nextPhraseIndex()).nextPhraseIndex()));
             stateInt++;
             return fsm;
         }
@@ -152,26 +140,16 @@ public class REcompile {
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
                 if (stateInt-1== dummyEndInt){
                     previousState = FiniteStateMachine.get(dummyStartInt);
-                    if(stateAsteriskState.stateIndex() == FiniteStateMachine.get(stateAsteriskState.nextPhrase2Index()).nextPhrase2Index())
+                    if(dummyStartInt == stateAsteriskState.nextPhrase2Index())
                     {
-                        stateAsteriskState.nextPhrase2Index(stateAsteriskState.nextPhrase2Index()+1);
+                        stateAsteriskState.nextPhrase2Index(dummyStartInt+1);
                     }
                 }
                 FiniteStateMachine.add(stateAsteriskState);
                 if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
                     previousState.nextPhraseIndex(stateInt);
-                    previousState.nextPhrase2Index(stateInt);
-                }
-                if(stateAsteriskState.stateIndex() == FiniteStateMachine.get(stateAsteriskState.nextPhrase2Index()).nextPhrase2Index())
-                {
-                    stateAsteriskState.nextPhrase2Index(stateAsteriskState.nextPhrase2Index()+1);
-                }
-                if(stateAsteriskState.nextPhrase2Index()==stateAsteriskState.stateIndex())
-                {
-                    stateAsteriskState.nextPhrase2Index(previousState.stateIndex()+1);
                 }
                 previousState.nextPhrase2Index(stateInt);
-
                 stateInt++;
                 state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
                 //take note of the final state of previous state
@@ -266,7 +244,6 @@ public class REcompile {
                         }
                         if(startState>dummyStartInt+1 && dummyEndInt > startState)
                         {
-
                         }
                         else
                         {
@@ -285,10 +262,6 @@ public class REcompile {
     }
     public static void parse(String s) throws Exception {
         try {
-            fsm = new state(stateInt, '|', 1, 1);
-            FiniteStateMachine.add(fsm);
-            stateInt++;
-            startState = stateInt;
             fsm = expression(s);
             if (globalInt < s.length()) {
                 if (s.charAt(globalInt) != '\0') {
@@ -297,14 +270,6 @@ public class REcompile {
             }
             FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
             if (valid) {
-                //if my special characters didn't do anything to alter the start state, don't do anything to it
-                FiniteStateMachine.get(0).nextPhraseIndex(startState);
-                FiniteStateMachine.get(0).nextPhrase2Index(startState);
-                if(FiniteStateMachine.get(FiniteStateMachine.get(0).nextPhrase2Index())._symbol()!='|'||FiniteStateMachine.get(FiniteStateMachine.get(0).nextPhrase2Index())._symbol()!='|') {
-                    FiniteStateMachine.get(0).nextPhraseIndex(fsm.stateIndex());
-                    FiniteStateMachine.get(0).nextPhrase2Index(fsm.stateIndex());
-                }
-
                 for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
                     System.out.println(FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
                 }
@@ -314,7 +279,6 @@ public class REcompile {
             error();
         }
     }
-
     //if the character is not a symbol
     public static boolean isVocab(char c, String s) throws Exception {
         //normal check is if there is a special character or not
@@ -335,7 +299,6 @@ public class REcompile {
         }
         return true;
     }
-
     public static void error() {
         valid = false;
     }
