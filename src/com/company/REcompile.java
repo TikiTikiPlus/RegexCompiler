@@ -146,14 +146,14 @@ public class REcompile {
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
                 if (stateInt-1== dummyEndInt){
                     previousState = FiniteStateMachine.get(dummyStartInt);
+                    if(dummyStartInt +1 != stateAsteriskState.stateIndex())
+                    {
+                        stateAsteriskState.nextPhrase2Index(startState+1);
+                    }
                 }
                 FiniteStateMachine.add(stateAsteriskState);
                 if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
                     previousState.nextPhraseIndex(stateInt);
-                }
-                if(startState +1 != stateAsteriskState.stateIndex())
-                {
-                    stateAsteriskState.nextPhrase2Index(startState+1);
                 }
                 if(dummyStartInt==startState+1)
                 {
