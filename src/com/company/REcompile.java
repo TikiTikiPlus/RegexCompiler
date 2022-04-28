@@ -24,10 +24,11 @@ public class REcompile {
     static int endStateExpression = 0;
     static int dummyStartInt = 0;
     static int dummyEndInt = 0;
-
+    static String illegalNext;
     public static void main(String[] args) throws Exception {
         FiniteStateMachine = new ArrayList<>();
         String nonLiteralString = "*?+|()[]";
+        illegalNext = "*?+";
         for (int i = 0; i < nonLiteralString.length(); i++) {
             nonLiterals.add(nonLiteralString.charAt(i));
         }
@@ -123,11 +124,16 @@ public class REcompile {
         //get previous index and the next one
         //update the pointer of previous one
         //forward the pointer by one
-        if (globalInt < s.length()) {
+        if (globalInt < s.length()){
             //this would return an error if statement looks like this
             //REGEX: (a*) or (a?)
             //if you have a double star or double question mark, return error
             //if globalint + 1 is greater than size
+            if(globalInt > 2) {
+                if (illegalNext.contains(String.valueOf(s.charAt(globalInt - 1))) && FiniteStateMachine.get(FiniteStateMachine.size()-1)._symbol()=='|') {
+                    error();
+                }
+            }
             if (s.charAt(globalInt) == '*') {
                 state stateAsteriskState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
@@ -182,6 +188,7 @@ public class REcompile {
                 globalInt++;
                 fsm = oneOrNone;
             }
+
             //checks if the character is an or sign
             //also checks if the or sign is adjacent to each other
         }
