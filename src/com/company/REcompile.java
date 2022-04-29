@@ -42,6 +42,10 @@ public class REcompile {
         }
         input = input.substring(0, 0) + '(' + input.substring(0);
         input = input.substring(0, input.length())+ ')'+input.substring(input.length());
+        //fixes a bug where if there is a bracket on the very first entry, it would return an out of bounds exception error
+        state firstState = new state(stateInt, '|', stateInt+1,stateInt+1);
+        FiniteStateMachine.add(firstState);
+        stateInt++;
         parse(input);
     }
     //find an expression
@@ -81,24 +85,22 @@ public class REcompile {
             //gets the previous state. basically the state index -1 for the most part
             state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-1);
             //set a default orState
-            state orState = new state(stateInt, '|', startState+1, stateInt + 1);
+            System.out.println(startState);
+            state orState = new state(stateInt, '|', startState, stateInt + 1);
             FiniteStateMachine.add(orState);
             int lastState = FiniteStateMachine.get(orState.nextPhraseIndex()-1).nextPhrase2Index();
-            if(lastState== orState.nextPhraseIndex())
+            if(lastState==orState.nextPhraseIndex())
             {
-                if( FiniteStateMachine.get(orState.nextPhraseIndex()-1).nextPhrase2Index() ==  FiniteStateMachine.get(orState.nextPhraseIndex()-1).nextPhraseIndex())
+                if(orState.nextPhraseIndex()==dummyStartInt)
                 {
-
-                }
-                else {
-                    orState.nextPhraseIndex(startState);
+                    orState.nextPhraseIndex(startState+1);
                 }
             }
+            startState = orState.stateIndex();
             stateInt++;
             //if there is an or state before, point to there
             bracketList.add(orState.stateIndex());
             globalInt++;
-            startState = orState.stateIndex();
             state currState = expression(s);
             state newState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
             //take note of the final state of previous state
