@@ -96,6 +96,7 @@ public class REcompile {
                     orState.nextPhraseIndex(startState+1);
                 }
             }
+
             startState = orState.stateIndex();
             stateInt++;
             //if there is an or state before, point to there
@@ -265,6 +266,10 @@ public class REcompile {
                         if(dummyStartInt != fsm.stateIndex()) {
                             dummyStart.nextPhraseIndex(fsm.stateIndex());
                             dummyStart.nextPhrase2Index(fsm.stateIndex());
+                            if(fsm.nextPhraseIndex() == dummyStartInt && FiniteStateMachine.get(dummyStartInt).nextPhraseIndex() == fsm.stateIndex())
+                            {
+                                fsm.nextPhraseIndex(dummyStartInt+1);
+                            }
                         }
                         if(startState>dummyStartInt+1 && dummyEndInt > startState)
                         {
