@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class REcompile {
-    static ArrayList<state> FiniteStateMachine;
+    static ArrayList<state> FiniteStateMachine = new ArrayList<>();
     static String input = "";
     //the variable that is responsible for looking at the string input
     static int globalInt = 0;
@@ -25,8 +25,7 @@ public class REcompile {
     static int dummyStartInt = 0;
     static int dummyEndInt = 0;
     static String illegalNext;
-    public static void main(String[] args) throws Exception {
-        FiniteStateMachine = new ArrayList<>();
+    public static void main(String[] args) throws Exception {;
         String nonLiteralString = "*?+|()[]";
         illegalNext = "*?+";
         for (int i = 0; i < nonLiteralString.length(); i++) {
@@ -140,8 +139,19 @@ public class REcompile {
                 }
             }
             if (input.charAt(globalInt) == '*') {
+
                 state stateAsteriskState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
+                if(previousState.stateIndex() == dummyStartInt)
+                {
+                    state openBracketInteraction = new state(stateInt, '|', stateInt + 1, stateInt+1);
+                    FiniteStateMachine.add(FiniteStateMachine.size()-1,openBracketInteraction);
+                    stateInt++;
+                    stateAsteriskState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex()+1);
+                    FiniteStateMachine.get(FiniteStateMachine.size()-1).nextPhraseIndex(stateAsteriskState.stateIndex());
+                    FiniteStateMachine.get(FiniteStateMachine.size()-1).nextPhrase2Index(stateAsteriskState.stateIndex());
+                    previousState = openBracketInteraction;
+                }
                 if (stateInt-1== dummyEndInt){
                     previousState = FiniteStateMachine.get(dummyStartInt);
                     if(dummyStartInt == stateAsteriskState.nextPhrase2Index())
@@ -177,6 +187,16 @@ public class REcompile {
             } else if (input.charAt(globalInt) == '?') {
                 state oneOrNone = new state(stateInt, '|', stateInt + 1, stateInt+1);
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
+                if(previousState.stateIndex() == dummyStartInt)
+                {
+                    state openBracketInteraction = new state(stateInt, '|', stateInt, stateInt);
+                    FiniteStateMachine.add(FiniteStateMachine.size()-1,openBracketInteraction);
+                    stateInt++;
+                    oneOrNone = new state(stateInt, '|', stateInt + 1, stateInt+1);
+                    FiniteStateMachine.get(FiniteStateMachine.size()-1).nextPhraseIndex(oneOrNone.stateIndex());
+                    FiniteStateMachine.get(FiniteStateMachine.size()-1).nextPhrase2Index(oneOrNone.stateIndex());
+                    previousState = openBracketInteraction;
+                }
                 if (stateInt-1== dummyEndInt) {
                     previousState = FiniteStateMachine.get(dummyStartInt);
                 }
