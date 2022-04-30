@@ -56,9 +56,11 @@ public class REcompile {
     //find an expression
     //output a Term first before expression
     public static state expression(String s) throws Exception {
+        //to return whatever the start state that i set to be
         if (input.charAt(globalInt) == ')') {
             return FiniteStateMachine.get(startState);
         }
+        //refactors square brackets
         if (input.charAt(globalInt) == '[') {
             int squareMarker = globalInt;
             input = input.substring(0, squareMarker) + '(' + input.substring(squareMarker + 1);
@@ -83,6 +85,7 @@ public class REcompile {
         }
         if (input.charAt(globalInt) == '|') {
             String orIllegalNext = illegalNext += '|';
+            //checks to see if the previous character is escaped or not
             if(globalInt > 2) {
                 if (orIllegalNext.contains(String.valueOf(input.charAt(globalInt + 1))) && (input.charAt(globalInt - 1) != '\\' || input.charAt(globalInt - 2) != '\\')) {
                     error();
@@ -91,10 +94,12 @@ public class REcompile {
             //gets the previous state. basically the state index -1 for the most part
             state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-1);
             //set a default orState
-            System.out.println(startState);
             state orState = new state(stateInt, '|', startState, stateInt + 1);
             FiniteStateMachine.add(orState);
             int lastState = FiniteStateMachine.get(orState.nextPhraseIndex()-1).nextPhrase2Index();
+            //checks if the state we are targetting
+            //is gonna go into a recursive loop
+            //if thats the case, we add + 1 to or state index
             if(lastState==orState.nextPhraseIndex())
             {
                 if(orState.nextPhraseIndex()==dummyStartInt)
@@ -102,7 +107,7 @@ public class REcompile {
                     orState.nextPhraseIndex(startState+1);
                 }
             }
-
+            //set the start state to current or state
             startState = orState.stateIndex();
             stateInt++;
             //if there is an or state before, point to there
@@ -159,9 +164,11 @@ public class REcompile {
                 }
             }
             if (input.charAt(globalInt) == '*') {
-
                 state stateAsteriskState = new state(stateInt, '|', stateInt + 1, fsm.stateIndex());
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
+                //checks if previous state is the start of an open bracket
+                //if so, set a dummy state in front of it and this one
+                //points to the asterisk
                 if(previousState.stateIndex() == dummyStartInt)
                 {
                     state openBracketInteraction = new state(stateInt, '|', stateInt + 1, stateInt+1);
@@ -172,6 +179,7 @@ public class REcompile {
                     FiniteStateMachine.get(FiniteStateMachine.size()-1).nextPhrase2Index(stateAsteriskState.stateIndex());
                     previousState = openBracketInteraction;
                 }
+                //checks if a recursive loop is happening
                 if (stateInt-1== dummyEndInt){
                     previousState = FiniteStateMachine.get(dummyStartInt);
                     if(dummyStartInt == stateAsteriskState.nextPhrase2Index())
@@ -180,6 +188,7 @@ public class REcompile {
                     }
                 }
                 FiniteStateMachine.add(stateAsteriskState);
+                //set the previous state to point to this
                 if (previousState.nextPhraseIndex() == previousState.nextPhrase2Index()) {
                     previousState.nextPhraseIndex(stateInt);
                 }
@@ -207,6 +216,10 @@ public class REcompile {
             } else if (input.charAt(globalInt) == '?') {
                 state oneOrNone = new state(stateInt, '|', stateInt + 1, stateInt+1);
                 state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-2);
+                //checks if previous state is a dummy state
+                //that was caused by bracket states
+                //then create a dummy state after it to point to both
+                //the none or one state
                 if(previousState.stateIndex() == dummyStartInt)
                 {
                     state openBracketInteraction = new state(stateInt, '|', stateInt, stateInt);
@@ -249,6 +262,9 @@ public class REcompile {
                 FiniteStateMachine.add(fsm);
                 globalInt++;
                 stateInt++;
+                //check if the character is an escape character
+                //if so, create 2 states. One being the escape character
+                //and the other, the escaped character
                 if (globalInt < input.length()) {
                     if (input.charAt(globalInt - 1) == '\\') {
                         state escapeState = new state(stateInt, input.charAt(globalInt), stateInt + 1, stateInt + 1);
@@ -288,6 +304,8 @@ public class REcompile {
                                 fsm.nextPhraseIndex(dummyStartInt+1);
                             }
                         }
+                        //checks if the start state is inside current brackets or not
+                        //if its not, then don't change current start state
                         if(startState>dummyStartInt+1 && dummyEndInt > startState)
                         {
 
@@ -310,12 +328,15 @@ public class REcompile {
     public static void parse(String s) throws Exception {
         try {
             fsm = expression(s);
+            //usually happens when an open bracket isn't closed
+            //or no open brackets
             if (globalInt < input.length()) {
                 if (input.charAt(globalInt) != '\0') {
                     error();
                 }
             }
             FiniteStateMachine.add(new state(FiniteStateMachine.size(), '|', 0, 0));
+            //print out the states if the things are valid
             if (valid) {
                 for (int fsmIndex = 0; fsmIndex < FiniteStateMachine.size(); fsmIndex++) {
                     System.out.println(FiniteStateMachine.get(fsmIndex)._symbol() + "," + FiniteStateMachine.get(fsmIndex).nextPhraseIndex() + "," + FiniteStateMachine.get(fsmIndex).nextPhrase2Index());
