@@ -75,12 +75,13 @@ public class REcompile {
                 input = stringBuffer.toString();
             }
             input = input.substring(0, squareMarker) + ')' + input.substring(squareMarker + 1);
-            //s = s.substring(0, squareMarker) + ')' + s.substring(squareMarker + 1);
         }
         if (input.charAt(globalInt) == '|') {
             String orIllegalNext = illegalNext += '|';
-            if (orIllegalNext.contains(String.valueOf(input.charAt(globalInt+1))) && input.charAt(globalInt-1) != '\\') {
-                error();
+            if(globalInt > 2) {
+                if (orIllegalNext.contains(String.valueOf(input.charAt(globalInt + 1))) && (input.charAt(globalInt - 1) != '\\' || input.charAt(globalInt - 2) != '\\')) {
+                    error();
+                }
             }
             //gets the previous state. basically the state index -1 for the most part
             state previousState = FiniteStateMachine.get(FiniteStateMachine.size()-1);
@@ -138,7 +139,18 @@ public class REcompile {
             //if globalint + 1 is greater than size
             if(globalInt > 2) {
                 if (illegalNext.contains(String.valueOf(input.charAt(globalInt - 1))) && FiniteStateMachine.get(FiniteStateMachine.size()-1)._symbol()=='|') {
-                    error();
+                    if(FiniteStateMachine.size() > 2)
+                    {
+                        if(FiniteStateMachine.get(FiniteStateMachine.size()-2)._symbol() == '\\')
+                        {
+
+                        }
+                        else
+                        {
+                            error();
+                        }
+                    }
+
                 }
             }
             if (input.charAt(globalInt) == '*') {
@@ -238,7 +250,7 @@ public class REcompile {
                         FiniteStateMachine.add(escapeState);
                         stateInt++;
                         globalInt++;
-                        fsm = escapeState;
+                        return escapeState;
                     }
                 }
             } else {
