@@ -96,6 +96,12 @@ public class REcompile {
             //set a default orState
             state orState = new state(stateInt, '|', startState, stateInt + 1);
             FiniteStateMachine.add(orState);
+            //fixes a bug where the statement is (A|B)|(C|D)
+            //would just cause an infinite recursion
+            if(orState.nextPhraseIndex() == dummyStartInt)
+            {
+                orState.nextPhraseIndex(startState+1);
+            }
             int lastState = FiniteStateMachine.get(orState.nextPhraseIndex()-1).nextPhrase2Index();
             //checks if the state we are targetting
             //is gonna go into a recursive loop
@@ -124,6 +130,7 @@ public class REcompile {
                 previousState.nextPhrase2Index(newState.stateIndex());
             }
             previousState.nextPhraseIndex(newState.stateIndex());
+
             stateInt++;
             return fsm;
         }
