@@ -369,6 +369,7 @@ public class REcompile {
     }
     public static void error() {
         valid = false;
+        System.err.println("Invalid Expression");
     }
 }
 class state {
