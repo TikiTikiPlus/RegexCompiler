@@ -1,5 +1,4 @@
 package com.company;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class REcompile {
@@ -40,13 +39,19 @@ public class REcompile {
                 input += args[argsIndex];
             }
         }
-        input = input.substring(0, 0) + '(' + input.substring(0);
-        input = input.substring(0, input.length())+ ')'+input.substring(input.length());
-        //fixes a bug where if there is a bracket on the very first entry, it would return an out of bounds exception error
-        state firstState = new state(stateInt, '|', stateInt+1,stateInt+1);
-        FiniteStateMachine.add(firstState);
-        stateInt++;
-        parse(input);
+        if(input.length() == 0)
+        {
+            error();
+        }
+        else {
+            input = input.substring(0, 0) + '(' + input.substring(0);
+            input = input.substring(0, input.length()) + ')' + input.substring(input.length());
+            //fixes a bug where if there is a bracket on the very first entry, it would return an out of bounds exception error
+            state firstState = new state(stateInt, '|', stateInt + 1, stateInt + 1);
+            FiniteStateMachine.add(firstState);
+            stateInt++;
+            parse(input);
+        }
     }
     //find an expression
     //output a Term first before expression
@@ -344,4 +349,40 @@ public class REcompile {
     public static void error() {
         valid = false;
     }
+}
+class state {
+    private char _symbol;
+    private int _nextPhrase1;
+    private int _nextPhrase2;
+    private int _stateIndex;
+    public state(int index,char symbol, int nextPhraseIndex, int nextPhrase2Index)
+    {
+        _stateIndex = index;
+        _symbol = symbol;
+        _nextPhrase1 = nextPhraseIndex;
+        _nextPhrase2 = nextPhrase2Index;
+    }
+    public char _symbol()
+    {
+        return this._symbol;
+    }
+    public int nextPhraseIndex()
+    {
+        return this._nextPhrase1;
+    }
+    public int nextPhraseIndex(int nextPhrase)
+    {
+        this._nextPhrase1 = nextPhrase;
+        return this._nextPhrase1;
+    }
+    public int nextPhrase2Index()
+    {
+        return this._nextPhrase2;
+    }
+    public int nextPhrase2Index(int nextPhrase2)
+    {
+        this._nextPhrase2 = nextPhrase2;
+        return this.nextPhrase2Index();
+    }
+    public int stateIndex(){return this._stateIndex;}
 }
