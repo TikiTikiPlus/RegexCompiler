@@ -98,7 +98,7 @@ public class REcompile {
             FiniteStateMachine.add(orState);
             //fixes a bug where the statement is (A|B)|(C|D)
             //would just cause an infinite recursion
-            if(orState.nextPhraseIndex() == dummyStartInt)
+            if(orState.nextPhraseIndex() == 1)
             {
                 orState.nextPhraseIndex(startState+1);
             }
